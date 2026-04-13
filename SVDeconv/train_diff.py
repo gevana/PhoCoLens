@@ -20,7 +20,7 @@ from dataloader import get_dataloaders
 from utils.dir_helper import dir_init
 from models import get_model
 from loss import GLoss
-from diff_config import initialise
+from config_diffusercam import initialise #as initialise_diffusercam
 from metrics import PSNR
 
 # Typing

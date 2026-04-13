@@ -38,4 +38,7 @@ def generate_train_val_split(target_train_list, target_val_list, train_list, val
             target_line = "val/decoded_sim_captures/" + img_name
             f.write(target_line)
 
-generate_train_val_split('data/phlatcam/text_files/decoded_sim_captures_train.txt', 'data/phlatcam/text_files/decoded_sim_captures_val.txt', 'data/phlatcam/text_files/train_target.txt', 'data/phlatcam/text_files/val_target.txt')
+generate_train_val_split('data/phlatcam/text_files/decoded_sim_captures_train.txt', 
+                         'data/phlatcam/text_files/decoded_sim_captures_val.txt', 
+                         'data/phlatcam/text_files/train_target.txt', 
+                         'data/phlatcam/text_files/val_target.txt')

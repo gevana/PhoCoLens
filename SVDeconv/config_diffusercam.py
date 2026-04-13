@@ -33,6 +33,7 @@ fft_args_dict = {
     "fft_gamma": 100,  # Gamma for Weiner init
     "fft_requires_grad": False,
     "fft_epochs": 0,
+    "use_mask": False,
 }
 
 def base_config():
@@ -49,6 +50,7 @@ def base_config():
     # ---------------------------------------------------------------------------- #
 
     image_dir = Path("data/diffusercam")
+    psf_mat = Path(image_dir) / "psf.tiff"
     output_dir = Path("output/diffusercam") / exp_name
     ckpt_dir = Path("ckpts/diffusercam") / exp_name
     run_dir = Path("runs/diffusercam") / exp_name  # Tensorboard
@@ -138,6 +140,9 @@ def base_config():
     distdataparallel = False
     val_train = False
     static_val_image = ""
+    decode_sim = False
+    preprocess_with_unet=False
+    dataset_name="diffusercam"
 
 
 

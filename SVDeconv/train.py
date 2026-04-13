@@ -8,6 +8,8 @@ from collections import defaultdict
 import logging
 import numpy as np
 import os, sys, warnings
+from pathlib import Path
+
 
 # Torch Libs
 import torch
@@ -20,7 +22,9 @@ from dataloader import get_dataloaders
 from utils.dir_helper import dir_init
 from models import get_model
 from loss import GLoss
-from config import initialise
+from config import initialise as initialise_phlatcam
+from config_diffusercam import initialise as initialise_diffusercam
+
 from metrics import PSNR
 
 # Typing
@@ -43,6 +47,12 @@ from utils.ops import rggb_2_rgb, unpixel_shuffle
 from utils.tupperware import tupperware
 
 # Experiment, add any observers by command line
+def initialise(ex):
+    if False: #"type=diffusercam" in sys.argv:
+        return initialise_diffusercam(ex)
+    else:
+        return initialise_phlatcam(ex)
+
 ex = Experiment("Train")
 ex = initialise(ex)
 
@@ -67,7 +77,7 @@ np.random.seed(seed)
 @ex.automain
 def main(_run):
     args = tupperware(_run.config)
-
+    args.image_dir = Path(args.image_dir)
     # Dir init
     dir_init(args, is_local_rank_0=is_local_rank_0)
 
