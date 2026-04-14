@@ -500,6 +500,14 @@ def main(_run):
                             f"Filename/Val_{e + 1}", filename[e], global_step
                         )
 
+                        # save images to log dir
+                        vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"val_source_{global_step}_{e+1}.png"))
+                        vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"val_{interm_name.lower()}_{global_step}_{e+1}.png"))
+                        vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"val_target_{global_step}_{e+1}.png"))
+                        vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"val_output_{global_step}_{e+1}.png"))
+
+
+
                     for e, filename in enumerate(filename_static):
                         if filename == args.static_val_image:
                             if not is_admm:
@@ -546,12 +554,7 @@ def main(_run):
                                 f"Filename/Val_Static", filename[e], global_step
                             )
 
-                            # save images to log dir
-                            vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"val_source_{global_step}_{e+1}.png"))
-                            vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"val_{interm_name.lower()}_{global_step}_{e+1}.png"))
-                            vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"val_target_{global_step}_{e+1}.png"))
-                            vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"val_output_{global_step}_{e+1}.png"))
-
+                           
                             break
 
                     logging.info(
