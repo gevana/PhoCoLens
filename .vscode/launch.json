@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "Python Debugger: Current File",
             "type": "debugpy",
@@ -29,7 +28,7 @@
             ]
         },
         {
-            "name": "train diffusercam",    
+            "name": "train diffusercam",
             "type": "debugpy",
             "request": "launch",
             "program": "train_diff.py",
@@ -37,7 +36,9 @@
             "cwd": "${workspaceFolder}/SVDeconv",
             "args": [
                 "with",
-                "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                //"image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                "image_dir=/mnt/c/dev/lensless/diffuser_data",
+                "num_epochs=1",
                 //"type=diffusercam",
                 //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
                 //"ckpt_dir=/mnt/c/dev/lensless/phlatcam/flatnet-gen-ckpts/ckpts_phase_mask_Feb_2020_size_384/ours-fft-1280-1408-learn-1280-1408-meas-1280-1408/",
@@ -47,7 +48,7 @@
             ]
         },
         {
-            "name": "train phlatcam",    
+            "name": "train phlatcam",
             "type": "debugpy",
             "request": "launch",
             "program": "train.py",

@@ -14,6 +14,8 @@ import torch
 import torch.nn.functional as F
 import torch.distributed as dist
 from torch.utils.tensorboard import SummaryWriter
+import datetime
+import torchvision.utils as vutils
 
 # Modules
 from dataloader import get_dataloaders
@@ -45,6 +47,7 @@ from utils.tupperware import tupperware
 # Experiment, add any observers by command line
 ex = Experiment("Train")
 ex = initialise(ex)
+
 
 # local rank 0: for logging, saving ckpts
 if "LOCAL_RANK" in os.environ:
@@ -125,7 +128,13 @@ def main(_run):
             FFT, device_ids=[rank], output_device=rank
         )
 
-    writer = SummaryWriter(log_dir=str(args.run_dir))
+
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = os.path.join(args.run_dir, timestamp)
+    images_dir = os.path.join(log_dir, "images")
+    os.makedirs(images_dir, exist_ok=True)
+    writer = SummaryWriter(log_dir=str(log_dir))
     writer.add_text("Args", pprint_args(args))
 
     # Log no of GPUs
@@ -343,6 +352,13 @@ def main(_run):
                                 f"Filename/Train_{e + 1}", filename[e], global_step
                             )
 
+
+                            # save images to log dir
+                            vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"train_source_{global_step}_{e+1}.png"))
+                            vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"train_{interm_name.lower()}_{global_step}_{e+1}.png"))
+                            vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"train_target_{global_step}_{e+1}.png"))
+                            vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"train_output_{global_step}_{e+1}.png"))
+
                 # Save checkpoint
                 if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
 
@@ -529,6 +545,12 @@ def main(_run):
                             writer.add_text(
                                 f"Filename/Val_Static", filename[e], global_step
                             )
+
+                            # save images to log dir
+                            vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"val_source_{global_step}_{e+1}.png"))
+                            vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"val_{interm_name.lower()}_{global_step}_{e+1}.png"))
+                            vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"val_target_{global_step}_{e+1}.png"))
+                            vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"val_output_{global_step}_{e+1}.png"))
 
                             break
 

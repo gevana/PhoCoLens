@@ -23,7 +23,8 @@ from utils.dir_helper import dir_init
 from utils.tupperware import tupperware
 from models import get_model
 from metrics import PSNR
-from config import initialise
+#from config import initialise
+from config_diffuser import initialise
 from skimage.metrics import structural_similarity as ssim
 from utils.model_serialization import load_state_dict
 
