@@ -4,12 +4,30 @@ from models.multi_fftlayer import MultiFFTLayer as SVDeconvLayer
 
 from models.fftlayer import FFTLayer
 from models.fftlayer_diff import FFTLayer_diff
+from models.fftlayer_diff import FFTLayer_dummy
 from models.unet_128 import Unet as Unet_128
 from models.unet import UNet270480 as Unet_diff
 
 def get_inversion_and_channels(args):
-    is_svd = "svd" in args.exp_name
-    is_diff = "diff" in args.exp_name
+    
+    if hasattr(args, "is_svd"):
+        is_svd = args.is_svd
+    else:
+        is_svd = "svd" in args.exp_name
+    if hasattr(args, "is_diff"):
+        is_diff = args.is_diff
+    else:
+        is_diff = "diff" in args.exp_name
+    if hasattr(args, "is_dummy_wiener"):
+        is_dummy_wiener = args.is_dummy_wiener
+    else:
+        is_dummy_wiener = "dummy_wiener" in args.exp_name
+    #is_svd = "svd" in args.exp_name
+    #is_diff = "diff" in args.exp_name
+    if is_dummy_wiener:
+        print("warning: Using dummy Wiener")
+        return FFTLayer_dummy, 3
+
 
     if is_svd and not is_diff:
         return SVDeconvLayer, 4 if args.load_raw else 3

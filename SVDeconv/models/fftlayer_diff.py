@@ -90,6 +90,7 @@ def get_wiener_matrix(psf, Gamma: int = 20000, centre_roll: bool = True):
     return wiener_mat.real
 
 
+
 class FFTLayer_diff(nn.Module):
     def __init__(self, args: "tupperware"):
         super().__init__()
@@ -176,6 +177,11 @@ class FFTLayer_diff(nn.Module):
         ]
         return img_deconv
 
+
+
+class FFTLayer_dummy(FFTLayer_diff):
+    def forward(self, img):
+        return img
 
 @ex.automain
 def main(_run):

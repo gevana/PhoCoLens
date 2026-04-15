@@ -39,6 +39,9 @@ fft_args_dict = {
 def base_config():
     exp_name = "fft-diffusercam"
     is_naive = "naive" in exp_name
+    is_dummy_wiener = False
+    is_diff = True
+    is_svd = False
     multi = 1
     use_spatial_weight = False
     weight_update = True
