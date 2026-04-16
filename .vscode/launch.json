@@ -89,7 +89,9 @@
                 //"num_epochs=1",
                 //"ckpt_dir=ckpts/diffusercam/fft-diffusercam/",
                 "ckpt_dir=/mnt/c/dev/lensless/checkpoints/test/",
-                "output_dir=temp_out/diffusercam"
+                "save_filename_latest_G=Epoch_90_model_latest.pth",
+                "save_filename_latest_FFT=Epoch_90_FFT_latest.pth",
+                "output_dir=temp_out/diffusercam",
                 //"is_dummy_wiener=True",
                 //"is_svd=True",
                 //"type=diffusercam",

@@ -11,3 +11,4 @@ SVDeconv/runs*
 SVDeconv/data/*
 *.pyc
 */logs
+*/temp_out/*

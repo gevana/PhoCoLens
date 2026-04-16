@@ -77,8 +77,8 @@ def main(_run):
 
     args.output_dir = Path(args.output_dir)
     ckpt_dir = Path(args.ckpt_dir)
-    model_gen_path = ckpt_dir / "model_latest.pth"
-    model_fft_path = ckpt_dir / "FFT_latest.pth"
+    model_gen_path = ckpt_dir / args.save_filename_latest_G
+    model_fft_path = ckpt_dir / args.save_filename_latest_FFT
     print("model_gen_path.exists()", model_gen_path.exists(), "model_fft_path.exists()", model_fft_path.exists())
     print("model_gen_path", model_gen_path, "model_fft_path", model_fft_path)
     if  model_gen_path.exists() and model_fft_path.exists():
@@ -196,14 +196,15 @@ def main(_run):
      
       
                 in_c = fft_output[e].shape[0]
-                for i in range(in_c // 4):
-                    fft_output_vis.append(rggb_2_rgb(fft_output[e][4*i:4*i+4]).mul(0.5).add(0.5))
-
-                for i in range(len(fft_output_vis)):
-                    fft_output_vis[i] = (fft_output_vis[i] - fft_output_vis[i].min()) / (
-                        fft_output_vis[i].max() - fft_output_vis[i].min()
-                    )
-                    fft_output_vis[i] = fft_output_vis[i].permute(1, 2, 0).cpu().detach().numpy()
+                if in_c // 4 == 1:
+                    fft_output_vis = rggb_2_rgb(fft_output[e]).mul(0.5).add(0.5)
+                else:
+                    fft_output_vis = fft_output[e].mul(0.5).add(0.5)
+                
+                fft_output_vis = (fft_output_vis - fft_output_vis.min()) / (
+                    fft_output_vis.max() - fft_output_vis.min()
+                )
+                fft_output_vis = fft_output_vis.permute(1, 2, 0).cpu().detach().numpy()
 
 
                 output_numpy = (
@@ -232,13 +233,15 @@ def main(_run):
                     str(path_target), (target_numpy[:, :, ::-1] * 255.0).astype(int)
                 )
 
+                cv2.imwrite(
+                    str(path_fft), (fft_output_vis[:, :, ::-1] * 255.0).astype(int)
+                )
 
 
-
-                for i in range(len(fft_output_vis)):
-                    cv2.imwrite(
-                        str(path_fft).replace(".png", f"_{i}.png"), (fft_output_vis[i][:, :, ::-1] * 255.0).astype(int)
-                    )
+                # for i in range(len(fft_output_vis)):
+                #     cv2.imwrite(
+                #         str(path_fft).replace(".png", f"_{i}.png"), (fft_output_vis[i][:, :, ::-1] * 255.0).astype(int)
+                #     )
               
             metrics_dict["SSIM"] = metrics_dict["SSIM"] / args.batch_size
             avg_metrics += metrics_dict
