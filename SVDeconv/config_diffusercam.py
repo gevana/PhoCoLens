@@ -57,6 +57,7 @@ def base_config():
     output_dir = Path("output/diffusercam") / exp_name
     ckpt_dir = Path("ckpts/diffusercam") / exp_name
     run_dir = Path("runs/diffusercam") / exp_name  # Tensorboard
+    load_dir = None
 
     # ---------------------------------------------------------------------------- #
     # Data
@@ -125,6 +126,7 @@ def base_config():
     lambda_image = 1  # mse
     lambda_l1 = 0 # l1
 
+    sanity_eval = False
     resume = False
     finetune = False  # Wont load loss or epochs
     concat_input = False

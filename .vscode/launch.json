@@ -58,11 +58,12 @@
             "cwd": "${workspaceFolder}/SVDeconv",
             "args": [
                 "with",
-                "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
-                //"image_dir=/mnt/c/dev/lensless/diffuser_data",
+                //"image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                "image_dir=/mnt/c/dev/lensless/diffuser_data",
                 "num_epochs=1",
                 //"is_dummy_wiener=True",
-                "resume=True"
+                "sanity_eval=True",
+                "load_dir=/mnt/c/dev/lensless/checkpoints/test/",
                 //"is_svd=True",
                 //"type=diffusercam",
                 //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
@@ -81,10 +82,11 @@
             "cwd": "${workspaceFolder}/SVDeconv",
             "args": [
                 "with",
-                "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
-                //"image_dir=/mnt/c/dev/lensless/diffuser_data",
+                //"image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                "image_dir=/mnt/c/dev/lensless/diffuser_data",
                 //"num_epochs=1",
-                "ckpt_dir=ckpts/diffusercam/fft-diffusercam/",
+                //"ckpt_dir=ckpts/diffusercam/fft-diffusercam/",
+                "ckpt_dir=/mnt/c/dev/lensless/checkpoints/test/",
                 "output_dir=temp_out/diffusercam"
                 //"is_dummy_wiener=True",
                 //"is_svd=True",

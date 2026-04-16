@@ -8,6 +8,7 @@ Train Script for Unet
 @requirements: See utils/requirments.txt
 """
 # Libraries
+from pathlib import Path
 from utils.model_serialization import load_state_dict
 
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -95,25 +96,29 @@ def get_optimisers(G, FFT, args):
 
 def load_models(G, FFT, g_optimizer, fft_optimizer, args, is_local_rank_0=True):
     # ...existing code...
-    if args.resume:
+    if args.resume or args.sanity_eval:
+        if args.load_dir is None:
+            load_dir = Path(args.ckpt_dir)
+        else:
+            load_dir = Path(args.load_dir)
         try:
             if args.inference_mode == "latest":
                 ckpt_G = torch.load(
-                    args.ckpt_dir / args.save_filename_latest_G, map_location=args.device
+                    load_dir / args.save_filename_latest_G, map_location=args.device
                 )
                 ckpt_FFT = torch.load(
-                    args.ckpt_dir / args.save_filename_latest_FFT, map_location=args.device
+                    load_dir / args.save_filename_latest_FFT, map_location=args.device
                 )
             else:
                 ckpt_G = torch.load(
-                    args.ckpt_dir / args.save_filename_G, map_location=args.device
+                    load_dir / args.save_filename_G, map_location=args.device
                 )
                 ckpt_FFT = torch.load(
-                    args.ckpt_dir / args.save_filename_FFT, map_location=args.device
+                    load_dir / args.save_filename_FFT, map_location=args.device
                 )
 
-            G.load_state_dict(ckpt_G["model"])
-            FFT.load_state_dict(ckpt_FFT["model"])
+            G.load_state_dict(ckpt_G["state_dict"])
+            FFT.load_state_dict(ckpt_FFT["state_dict"])
 
             if not args.finetune:
                 g_optimizer.load_state_dict(ckpt_G["optimizer"])

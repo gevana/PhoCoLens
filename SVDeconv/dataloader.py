@@ -55,11 +55,11 @@ def get_dataloaders(args, is_local_rank_0: bool = True):
             f"Dataset: {args.dataset_name} Len Train: {len(train_dataset)} Val: {len(val_dataset)}  Test: {len(test_dataset)}"
         )
 
-    train_loader = None
-    val_loader = None
-    test_loader = None
+    train_loader = DataLoader(train_dataset, batch_size=1)
+    val_loader = DataLoader(val_dataset, batch_size=1)
+    test_loader = DataLoader(test_dataset, batch_size=1)
 
-    if len(train_dataset):
+    if len(train_dataset) :
         if args.distdataparallel:
             train_sampler = torch.utils.data.distributed.DistributedSampler(
                 train_dataset, num_replicas=dist.get_world_size(), shuffle=True

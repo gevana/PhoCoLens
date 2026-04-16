@@ -146,6 +146,7 @@ def main(_run):
         writer.add_text("Args", pprint_args(args))
 
         # Pbars
+       
         train_pbar = tqdm(
             range(len(data.train_loader) * args.batch_size), dynamic_ncols=True
         )
@@ -169,7 +170,7 @@ def main(_run):
     if not global_step:
         global_step = start_epoch * len(data.train_loader) * args.batch_size
 
-    start_epoch = global_step // len(data.train_loader.dataset)
+    start_epoch = global_step // len(data.train_loader.dataset) if len(data.train_loader.dataset) > 0 else 0
 
     # Exponential averaging of loss
     loss_dict = {

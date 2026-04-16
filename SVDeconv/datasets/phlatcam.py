@@ -143,12 +143,12 @@ class PhaseMaskDataset(Dataset):
 
     def _load_dataset(self):
         if self.mode == "train":
-            source_paths = self._glob_images(self.args.train_source_list)[
-                : self.max_len
-            ]
-            target_paths = self._glob_images(self.args.train_target_list)[
-                : self.max_len
-            ]
+            if self.args.sanity_eval:
+                source_paths = []#self._glob_images(self.args.train_source_list)[:self.max_len]
+                target_paths = []#self._glob_images(self.args.train_target_list)[:self.max_len]
+            else:
+                source_paths = self._glob_images(self.args.train_source_list)[:self.max_len]
+                target_paths = self._glob_images(self.args.train_target_list)[:self.max_len]
 
         elif self.mode == "val":
             source_paths = self._glob_images(self.args.val_source_list)[: self.max_len]

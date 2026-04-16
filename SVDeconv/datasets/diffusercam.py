@@ -115,6 +115,8 @@ class LenslessLearningCollection:
         self.psf = load_psf(path / 'psf.tiff')
 
         train_diffused, train_ground_truth = load_manifest(path, 'dataset_train.csv', decode_sim = args.decode_sim)
+        if args.sanity_eval:
+            train_diffused, train_ground_truth =[],[]
         val_diffused, val_ground_truth = load_manifest(path, 'dataset_test.csv', decode_sim = args.decode_sim)
 
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth)
