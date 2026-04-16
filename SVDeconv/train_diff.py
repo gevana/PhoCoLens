@@ -8,6 +8,7 @@ from collections import defaultdict
 import logging
 import numpy as np
 import os, sys, warnings
+from pathlib import Path
 
 # Torch Libs
 import torch
@@ -70,6 +71,7 @@ np.random.seed(seed)
 @ex.automain
 def main(_run):
     args = tupperware(_run.config)
+    #args.ckpt_dir=Path(args.ckpt_dir)
 
     # Dir init
     dir_init(args, is_local_rank_0=is_local_rank_0)

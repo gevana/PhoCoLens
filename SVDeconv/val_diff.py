@@ -23,8 +23,8 @@ from utils.dir_helper import dir_init
 from utils.tupperware import tupperware
 from models import get_model
 from metrics import PSNR
-from config import initialise
-#from config_diffuser import initialise
+#from config import initialise
+from config_diffusercam import initialise
 from skimage.metrics import structural_similarity as ssim
 from utils.model_serialization import load_state_dict
 
@@ -75,15 +75,19 @@ def main(_run):
     # Model
     G, FFT = get_model.model(args)
 
-    ckpt_dir = Path("ckpts/phlatcam") / args.exp_name
+    args.output_dir = Path(args.output_dir)
+    ckpt_dir = Path(args.ckpt_dir)
     model_gen_path = ckpt_dir / "model_latest.pth"
     model_fft_path = ckpt_dir / "FFT_latest.pth"
     print("model_gen_path.exists()", model_gen_path.exists(), "model_fft_path.exists()", model_fft_path.exists())
     print("model_gen_path", model_gen_path, "model_fft_path", model_fft_path)
     if  model_gen_path.exists() and model_fft_path.exists():
-        logging.info(f"Loading model from {model_gen_path}")
         gen_ckpt = torch.load(model_gen_path, map_location=torch.device("cpu"))
         fft_ckpt = torch.load(model_fft_path, map_location=torch.device("cpu"))
+        global_step = gen_ckpt["global_step"]
+        epoch = gen_ckpt["epoch"]
+        logging.info(f"Loading model from {model_gen_path} epoch={epoch}")
+
 
     #     # G.load_state_dict(gen_ckpt["state_dict"])
         load_state_dict(G, gen_ckpt["state_dict"])
@@ -155,11 +159,17 @@ def main(_run):
           
 
             # Unpixelshuffle
-            fft_unpixel_shuffled = unpixel_shuffle(fft_output, args.pixelshuffle_ratio)
+            fft_unpixel_shuffled = unpixel_shuffle(
+                fft_output, args.pixelshuffle_ratio
+                )
             output_unpixel_shuffled = G(fft_unpixel_shuffled)
 
-            output = F.pixel_shuffle(output_unpixel_shuffled, args.pixelshuffle_ratio)
             
+            output = F.pixel_shuffle(
+                output_unpixel_shuffled, args.pixelshuffle_ratio
+                )
+
+
             acc_time += time.time() - start_time
 
             if args.device == "cuda:0" and i:
@@ -207,16 +217,24 @@ def main(_run):
                 )
 
                 # Dump to output folder
-                name = filename[e].replace(".JPEG", ".png")
+                name = filename[e].replace(".JPEG", ".png").replace('.npy','.png')
                 parent = name.split("_")[0]
                 path = val_path / parent
                 path.mkdir(exist_ok=True, parents=True)
                 path_output = path / ("output_" + name)
+                path_target = path / ("target_" + name)
                 path_fft = path / (f"{interm_name}_" + name)
 
                 cv2.imwrite(
                     str(path_output), (output_numpy[:, :, ::-1] * 255.0).astype(int)
                 )
+                cv2.imwrite(
+                    str(path_target), (target_numpy[:, :, ::-1] * 255.0).astype(int)
+                )
+
+
+
+
                 for i in range(len(fft_output_vis)):
                     cv2.imwrite(
                         str(path_fft).replace(".png", f"_{i}.png"), (fft_output_vis[i][:, :, ::-1] * 255.0).astype(int)

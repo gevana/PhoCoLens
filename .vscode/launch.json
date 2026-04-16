@@ -39,7 +39,55 @@
                 "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
                 //"image_dir=/mnt/c/dev/lensless/diffuser_data",
                 "num_epochs=1",
-                "is_dummy_wiener=True",
+                //"is_dummy_wiener=True",
+                "is_svd=True",
+                //"type=diffusercam",
+                //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
+                //"ckpt_dir=/mnt/c/dev/lensless/phlatcam/flatnet-gen-ckpts/ckpts_phase_mask_Feb_2020_size_384/ours-fft-1280-1408-learn-1280-1408-meas-1280-1408/",
+                //"ours_meas_1280_1408_decoded_sim_svd",
+                //"ours_diffusercam_mulnew_unet_padding_decode_sim",
+                "-p"
+            ]
+        },
+        {
+            "name": "train resume diffusercam",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "train_diff.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/SVDeconv",
+            "args": [
+                "with",
+                "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                //"image_dir=/mnt/c/dev/lensless/diffuser_data",
+                "num_epochs=1",
+                //"is_dummy_wiener=True",
+                "resume=True"
+                //"is_svd=True",
+                //"type=diffusercam",
+                //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
+                //"ckpt_dir=/mnt/c/dev/lensless/phlatcam/flatnet-gen-ckpts/ckpts_phase_mask_Feb_2020_size_384/ours-fft-1280-1408-learn-1280-1408-meas-1280-1408/",
+                //"ours_meas_1280_1408_decoded_sim_svd",
+                //"ours_diffusercam_mulnew_unet_padding_decode_sim",
+                "-p"
+            ]
+        },
+        {
+            "name": "val diffusercam",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "val_diff.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/SVDeconv",
+            "args": [
+                "with",
+                "image_dir=/mnt/extra/traning_datasets/lensless/dataset",
+                //"image_dir=/mnt/c/dev/lensless/diffuser_data",
+                //"num_epochs=1",
+                "ckpt_dir=ckpts/diffusercam/fft-diffusercam/",
+                "output_dir=temp_out/diffusercam"
+                //"is_dummy_wiener=True",
+                //"is_svd=True",
                 //"type=diffusercam",
                 //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
                 //"ckpt_dir=/mnt/c/dev/lensless/phlatcam/flatnet-gen-ckpts/ckpts_phase_mask_Feb_2020_size_384/ours-fft-1280-1408-learn-1280-1408-meas-1280-1408/",
