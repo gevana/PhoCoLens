@@ -64,6 +64,8 @@
                 //"is_dummy_wiener=True",
                 "sanity_eval=True",
                 "load_dir=/mnt/c/dev/lensless/checkpoints/test/",
+                "save_filename_latest_G=Epoch_90_model_latest.pth",
+                "save_filename_latest_FFT=Epoch_90_FFT_latest.pth",
                 //"is_svd=True",
                 //"type=diffusercam",
                 //"image_dir=/mnt/c/dev/lensless/phlatcam/imagenet/",
