@@ -142,6 +142,10 @@ def main(_run):
     with open(os.path.join(log_dir, "args.txt"), "w") as f:
         f.write(pprint_args(args))
 
+    logging.info("Logging images to {}".format(images_dir))
+    logging.info("Logging checkpoints to {}".format(args.ckpt_dir))
+    logging.info("Logging tensorboard to {}".format(log_dir))
+
     #create images savedirs: 
     if is_local_rank_0:
         images_dir = Path(images_dir)
