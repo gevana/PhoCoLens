@@ -138,6 +138,37 @@ def main(_run):
     os.makedirs(images_dir, exist_ok=True)
     writer = SummaryWriter(log_dir=str(log_dir))
     writer.add_text("Args", pprint_args(args))
+    # save args as text to dir: 
+    with open(os.path.join(log_dir, "args.txt"), "w") as f:
+        f.write(pprint_args(args))
+
+    #create images savedirs: 
+    if is_local_rank_0:
+        images_dir = Path(images_dir)
+        images_dir_train = images_dir / "train"
+        images_dir_val = images_dir / "val"
+        #images_dir_test = images_dir / "test"
+        images_dir_train.mkdir(parents=True, exist_ok=True)
+        images_dir_val.mkdir(parents=True, exist_ok=True)
+        #images_dir_test.mkdir(parents=True, exist_ok=True)
+        images_dir_train_source = images_dir_train / "source"
+        images_dir_train_fft = images_dir_train / "fft"
+        images_dir_train_target = images_dir_train / "target"
+        images_dir_train_output = images_dir_train / "output"
+        images_dir_val_source = images_dir_val / "source"
+        images_dir_val_fft = images_dir_val / "fft"
+        images_dir_val_target = images_dir_val / "target"
+        images_dir_val_output = images_dir_val / "output"
+        images_dir_train_source.mkdir(parents=True, exist_ok=True)
+        images_dir_train_fft.mkdir(parents=True, exist_ok=True)
+        images_dir_train_target.mkdir(parents=True, exist_ok=True)
+        images_dir_train_output.mkdir(parents=True, exist_ok=True)
+        images_dir_val_source.mkdir(parents=True, exist_ok=True)
+        images_dir_val_fft.mkdir(parents=True, exist_ok=True)
+        images_dir_val_target.mkdir(parents=True, exist_ok=True)
+        images_dir_val_output.mkdir(parents=True, exist_ok=True)
+
+
 
     # Log no of GPUs
     if is_local_rank_0:
@@ -357,10 +388,11 @@ def main(_run):
 
 
                             # save images to log dir
-                            vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"train_source_{global_step}_{e+1}.png"))
-                            vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"train_{interm_name.lower()}_{global_step}_{e+1}.png"))
-                            vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"train_target_{global_step}_{e+1}.png"))
-                            vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"train_output_{global_step}_{e+1}.png"))
+                            if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
+                                vutils.save_image(source_vis.cpu().detach(), images_dir_train_source / f"train_source_{global_step}_{e+1}.png")
+                                vutils.save_image(fft_output_vis.cpu().detach(), images_dir_train_fft / f"train_{interm_name.lower()}_{global_step}_{e+1}.png")
+                                vutils.save_image(target_vis.cpu().detach(), images_dir_train_target / f"train_target_{global_step}_{e+1}.png")
+                                vutils.save_image(output_vis.cpu().detach(), images_dir_train_output / f"train_output_{global_step}_{e+1}.png")
 
                 # Save checkpoint
                 if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
@@ -460,18 +492,12 @@ def main(_run):
                             f"Val Epoch : {epoch + 1} Step: {global_step}| PSNR: {avg_metrics.loss_dict['PSNR']:.3f}| Total Loss: {avg_metrics.loss_dict['g_loss']:.3f}"
                         )
 
-                if is_local_rank_0:
-                    for metric in avg_metrics.loss_dict:
-                        writer.add_scalar(
-                            f"Val_Metrics/{metric}",
-                            avg_metrics.loss_dict[metric],
-                            global_step,
-                        )
-                    n = np.min([3, args.batch_size])
-                    for e in range(n):
-                        if not is_admm:
-                            source_vis = rggb_2_rgb(source[e]).mul(0.5).add(0.5)
-                            fft_output_vis = rggb_2_rgb(fft_output[e]).mul(0.5).add(0.5)
+                    if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
+                        n = np.min([3, args.batch_size])
+                        for e in range(n):
+                            if not is_admm:
+                                source_vis = rggb_2_rgb(source[e]).mul(0.5).add(0.5)
+                                fft_output_vis = rggb_2_rgb(fft_output[e]).mul(0.5).add(0.5)
                         else:
                             source_vis = source[e].mul(0.5).add(0.5)
                             fft_output_vis = fft_output[e].mul(0.5).add(0.5)
@@ -504,11 +530,18 @@ def main(_run):
                         )
 
                         # save images to log dir
-                        vutils.save_image(source_vis.cpu().detach(), os.path.join(images_dir, f"val_source_{global_step}_{e+1}.png"))
-                        vutils.save_image(fft_output_vis.cpu().detach(), os.path.join(images_dir, f"val_{interm_name.lower()}_{global_step}_{e+1}.png"))
-                        vutils.save_image(target_vis.cpu().detach(), os.path.join(images_dir, f"val_target_{global_step}_{e+1}.png"))
-                        vutils.save_image(output_vis.cpu().detach(), os.path.join(images_dir, f"val_output_{global_step}_{e+1}.png"))
+                        vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch}_{e+1}.png")
+                        vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{e+1}.png")
+                        vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch}_{e+1}.png")
+                        vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch}_{e+1}.png")
 
+                    if is_local_rank_0:
+                        for metric in avg_metrics.loss_dict:
+                            writer.add_scalar(
+                                f"Val_Metrics/{metric}",
+                                avg_metrics.loss_dict[metric],
+                                global_step,
+                            )
 
 
                     for e, filename in enumerate(filename_static):
