@@ -394,9 +394,10 @@ def main(_run):
                             # save images to log dir
                             if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
                                 vutils.save_image(source_vis.cpu().detach(), images_dir_train_source / f"train_source_{global_step}_{e+1}.png")
-                                vutils.save_image(fft_output_vis.cpu().detach(), images_dir_train_fft / f"train_{interm_name.lower()}_{global_step}_{e+1}.png")
                                 vutils.save_image(target_vis.cpu().detach(), images_dir_train_target / f"train_target_{global_step}_{e+1}.png")
                                 vutils.save_image(output_vis.cpu().detach(), images_dir_train_output / f"train_output_{global_step}_{e+1}.png")
+                                if not args.is_svd:
+                                    vutils.save_image(fft_output_vis.cpu().detach(), images_dir_train_fft / f"train_{interm_name.lower()}_{global_step}_{e+1}.png")
 
                 # Save checkpoint
                 if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
@@ -535,9 +536,10 @@ def main(_run):
 
                         # save images to log dir
                         vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch}_{e+1}.png")
-                        vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{e+1}.png")
                         vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch}_{e+1}.png")
                         vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch}_{e+1}.png")
+                        if not args.is_svd:
+                            vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{e+1}.png")
 
                     if is_local_rank_0:
                         for metric in avg_metrics.loss_dict:
