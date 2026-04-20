@@ -367,12 +367,12 @@ def main(_run):
                                 source_vis.cpu().detach(),
                                 global_step,
                             )
-
-                            writer.add_image(
-                                f"{interm_name}/Train_{e + 1}",
-                                fft_output_vis.cpu().detach(),
-                                global_step,
-                            )
+                            if not args.is_svd:
+                                writer.add_image(
+                                    f"{interm_name}/Train_{e + 1}",
+                                    fft_output_vis.cpu().detach(),
+                                    global_step,
+                                )
 
                             writer.add_image(
                                 f"Target/Train_{e + 1}",
@@ -514,11 +514,12 @@ def main(_run):
                         target_vis = target[e].mul(0.5).add(0.5)
                         output_vis = output[e].mul(0.5).add(0.5)
 
-                        writer.add_image(
-                            f"{interm_name}/Val_{e+1}",
-                            fft_output_vis.cpu().detach(),
-                            global_step,
-                        )
+                        if not args.is_svd:
+                            writer.add_image(
+                                f"{interm_name}/Val_{e+1}",
+                                fft_output_vis.cpu().detach(),
+                                global_step,
+                            )
 
                         writer.add_image(
                             f"Source/Val_{e+1}", source_vis.cpu().detach(), global_step
