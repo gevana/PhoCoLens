@@ -57,6 +57,7 @@ def base_config():
     output_dir = Path("output/diffusercam") / exp_name
     ckpt_dir = Path("ckpts/diffusercam") / exp_name
     run_dir = Path("runs/diffusercam") / exp_name  # Tensorboard
+    test_set_path = None
     load_dir = None
 
     # ---------------------------------------------------------------------------- #

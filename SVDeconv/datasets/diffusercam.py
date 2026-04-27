@@ -88,9 +88,9 @@ class LenslessLearning(Dataset):
 
 
 class LenslessLearningInTheWild(Dataset):
-    def __init__(self, path):
+    def __init__(self, path,suffix='.npy'):
         xs = []
-        manifest = sorted((x.name for x in path.glob('*.npy')))
+        manifest = sorted((x.name for x in path.glob(f'*{suffix}')))
         for filename in manifest:
             xs.append(path / filename)
 
@@ -121,6 +121,10 @@ class LenslessLearningCollection:
 
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth)
         self.val_dataset = LenslessLearning(val_diffused, val_ground_truth)
+        if args.test_set_path is not None:
+            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.png')
+        else:
+            self.test_dataset = None
         self.region_of_interest = region_of_interest
 
 

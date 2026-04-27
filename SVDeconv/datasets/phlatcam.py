@@ -195,3 +195,29 @@ class PhaseMaskDataset(Dataset):
         # print(source.shape, target.shape)
         return source, target, source_path.name
   
+# class PhaseMaskDatasetTest(Dataset):
+#     def __init__(self, args, ):
+#         super().__init__()
+#         self.args = args
+#         self.image_dir = args.test_image_dir
+#         # find all the tiffs in self.image_dir
+#         self.image_paths = list(self.image_dir.glob("*.tiff"))
+
+    
+#     def __len__(self):
+#         return len(self.image_paths)
+    
+#     def __getitem__(self, index):
+#         source_path = self.image_paths[index]
+#         image = self.process_image(source_path)
+#         image = np.expand_dims(image.transpose((2, 0, 1)),0)
+#         image = torch.tensor(image).float()
+#         return image
+        
+#     def process_image(self, image_path):
+#         testim = cv.imread(str(image_path), -1).astype(np.float32)/4095. - 0.008273973
+#         testim = cv2.resize(testim, (testim.shape[1]//4, testim.shape[0]//4), interpolation=cv2.INTER_AREA)
+#         #image = np.expand_dims(testim.transpose((2, 0, 1)),0)
+#         #image = torch.tensor(image)
+#         return image
+    

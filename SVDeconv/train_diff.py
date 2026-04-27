@@ -135,7 +135,10 @@ def main(_run):
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     log_dir = os.path.join(args.run_dir, timestamp)
     images_dir = os.path.join(log_dir, "images")
+    ckpt_dir = os.path.join(log_dir, "ckpts")
+    args.ckpt_dir = Path(ckpt_dir)
     os.makedirs(images_dir, exist_ok=True)
+    os.makedirs(ckpt_dir, exist_ok=True)
     writer = SummaryWriter(log_dir=str(log_dir))
     writer.add_text("Args", pprint_args(args))
     # save args as text to dir: 
@@ -145,6 +148,7 @@ def main(_run):
     logging.info("Logging images to {}".format(images_dir))
     logging.info("Logging checkpoints to {}".format(args.ckpt_dir))
     logging.info("Logging tensorboard to {}".format(log_dir))
+    
 
     #create images savedirs: 
     if is_local_rank_0:
