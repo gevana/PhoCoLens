@@ -540,11 +540,11 @@ def main(_run):
                         )
 
                         # save images to log dir
-                        vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch}_{e+1}.png")
-                        vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch}_{e+1}.png")
-                        vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch}_{e+1}.png")
+                        vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch}_{i}.png")
+                        vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch}_{i}.png")
+                        vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch}_{i}.png")
                         if not args.is_svd:
-                            vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{e+1}.png")
+                            vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{i}.png")
 
                     if is_local_rank_0:
                         for metric in avg_metrics.loss_dict:
