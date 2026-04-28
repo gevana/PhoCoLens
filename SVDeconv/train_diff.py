@@ -501,8 +501,8 @@ def main(_run):
                             f"Val Epoch : {epoch + 1} Step: {global_step}| PSNR: {avg_metrics.loss_dict['PSNR']:.3f}| Total Loss: {avg_metrics.loss_dict['g_loss']:.3f}"
                         )
 
-                    if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
-                        n = np.min([3, args.batch_size])
+                    if is_local_rank_0 and i < 10 :#and (i % args.save_ckpt_interval == 0):
+                        n = np.min([1, args.batch_size])
                         for e in range(n):
                             if not is_admm:
                                 source_vis = rggb_2_rgb(source[e]).mul(0.5).add(0.5)
@@ -604,30 +604,30 @@ def main(_run):
                            
                             break
 
-                    logging.info(
-                        f"Saving weights at END OF epoch {epoch + 1} global step {global_step}, the PSNR is {avg_metrics.loss_dict['PSNR']:.3f}"
-                    )
+                logging.info(
+                    f"Saving weights at END OF epoch {epoch + 1} global step {global_step}, the PSNR is {avg_metrics.loss_dict['PSNR']:.3f}"
+                )
 
-                    # Save weights
-                    if avg_metrics.loss_dict["g_loss"] < loss:
-                        is_min = True
-                        loss = avg_metrics.loss_dict["g_loss"]
-                    else:
-                        is_min = False
+                # Save weights
+                if avg_metrics.loss_dict["g_loss"] < loss:
+                    is_min = True
+                    loss = avg_metrics.loss_dict["g_loss"]
+                else:
+                    is_min = False
 
-                    # Save weights
-                    save_weights(
-                        epoch=epoch,
-                        global_step=global_step,
-                        G=G,
-                        FFT=FFT,
-                        g_optimizer=g_optimizer,
-                        fft_optimizer=fft_optimizer,
-                        loss=loss,
-                        is_min=is_min,
-                        args=args,
-                        tag="best",
-                    )
+                # Save weights
+                save_weights(
+                    epoch=epoch,
+                    global_step=global_step,
+                    G=G,
+                    FFT=FFT,
+                    g_optimizer=g_optimizer,
+                    fft_optimizer=fft_optimizer,
+                    loss=loss,
+                    is_min=is_min,
+                    args=args,
+                    tag="best",
+                )
 
     except KeyboardInterrupt:
         if is_local_rank_0:
@@ -649,3 +649,9 @@ def main(_run):
                 is_min=True,
                 args=args,
             )
+
+    finally:
+        if is_local_rank_0:
+            writer.close()
+            logging.info("Training finished.\n")
+            logging.info("Results are saved in {}".format(log_dir))
