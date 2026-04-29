@@ -117,17 +117,10 @@ def main(_run):
     }
     avg_metrics = AvgLoss_with_dict(loss_dict=_metrics_dict, args=args)
 
-    if args.val_train:
-        logging.info("Validating on train set.")
-        data.val_loader = data.train_loader
-        
-    logging.info(
-        f"Loaded experiment {args.exp_name}, dataset {args.dataset_name}, trained for {start_epoch} epochs."
-    )
+    
   
     # Run val for an epoch
     avg_metrics.reset()
-    pbar = tqdm(range(len(data.val_loader) * args.batch_size), dynamic_ncols=True)
 
     if args.device == "cuda:0":
         start = torch.cuda.Event(enable_timing=True)
@@ -135,21 +128,41 @@ def main(_run):
     else:
         start = end = 0
 
+    if args.eval_on == "train":
+        logging.info("Validating on train set.")
+        val_path = args.output_dir / "train"
+        dl = data.train_loader
+    elif args.eval_on == "val":
+        logging.info("Validating on val set.")
+        val_path = args.output_dir / "val"
+        dl = data.val_loader
+    elif args.eval_on == "test":
+        logging.info("Validating on test set.")
+        val_path = args.output_dir / "test"
+        dl = data.test_loader
+
+    logging.info(
+        f"Loaded experiment {args.exp_name}, dataset {args.dataset_name}, trained for {start_epoch} epochs."
+    )
+    logging.info(f"evaluating on {args.eval_on} set of size {len(dl)}")
     # Val and test paths
-    val_path = args.output_dir / "val" if not args.val_train else args.output_dir / "train"
     val_path.mkdir(exist_ok=True, parents=True)
 
- 
+
+    pbar = tqdm(range(len(dl) * args.batch_size), dynamic_ncols=True)
+
 
     acc_time = 0.0
     with torch.no_grad():
         G.eval()
         FFT.eval()
-        for i, batch in enumerate(data.val_loader):
+        for i, batch in enumerate(dl):
             metrics_dict = defaultdict(float)
 
             source, target, filename = batch
-            source, target = (source.to(device), target.to(device))
+            source = source.to(device)
+            target = target.to(device) #if target is not None else None
+            
 
             if args.device == "cuda:0" and i:
                 start.record()
@@ -180,15 +193,17 @@ def main(_run):
                 metrics_dict["Time"] = 0.0
 
             # PSNR
-            metrics_dict["PSNR"] += PSNR(output, target).item()
+            if (target == 0).all() == False:
+                metrics_dict["PSNR"] += PSNR(output, target).item()
           
-            metrics_dict["LPIPS_01"] += lpips_criterion(
-                output.mul(0.5).add(0.5), target.mul(0.5).add(0.5)
-            ).mean().item()
-            # print(filename, lpips_criterion(
-            #     output.mul(0.5).add(0.5), target.mul(0.5).add(0.5)
-            # ).mean().item())
-            metrics_dict["LPIPS_11"] += lpips_criterion(output, target).mean().item()
+                metrics_dict["LPIPS_01"] += lpips_criterion(
+                    output.mul(0.5).add(0.5), target.mul(0.5).add(0.5)
+                ).mean().item()
+                metrics_dict["LPIPS_11"] += lpips_criterion(output, target).mean().item()
+                # print(filename, lpips_criterion(
+                #     output.mul(0.5).add(0.5), target.mul(0.5).add(0.5)
+                # ).mean().item())
+                
 
             for e in range(args.batch_size):
                 # Compute SSIM
@@ -210,15 +225,16 @@ def main(_run):
                 output_numpy = (
                     output[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
                 )
-                target_numpy = (
-                    target[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
-                )
-                metrics_dict["SSIM"] += ssim(
-                    target_numpy, output_numpy, multichannel=True, data_range=1.0,channel_axis = -1
+                if (target[e] == 0).all() == False:
+                    target_numpy = (
+                        target[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
+                    )
+                    metrics_dict["SSIM"] += ssim(
+                        target_numpy, output_numpy, multichannel=True, data_range=1.0,channel_axis = -1
                 )
 
                 # Dump to output folder
-                name = filename[e].replace(".JPEG", ".png").replace('.npy','.png')
+                name = filename[e].replace(".JPEG", ".png").replace('.npy','.png').replace(".tiff",".png")
                 parent = name.split("_")[0]
                 path = val_path / parent
                 path.mkdir(exist_ok=True, parents=True)
@@ -229,9 +245,11 @@ def main(_run):
                 cv2.imwrite(
                     str(path_output), (output_numpy[:, :, ::-1] * 255.0).astype(int)
                 )
-                cv2.imwrite(
-                    str(path_target), (target_numpy[:, :, ::-1] * 255.0).astype(int)
-                )
+                
+                if (target[e] == 0).all() == False:
+                    cv2.imwrite(
+                        str(path_target), (target_numpy[:, :, ::-1] * 255.0).astype(int)
+                    )
 
                 cv2.imwrite(
                     str(path_fft), (fft_output_vis[:, :, ::-1] * 255.0).astype(int)
@@ -242,9 +260,10 @@ def main(_run):
                 #     cv2.imwrite(
                 #         str(path_fft).replace(".png", f"_{i}.png"), (fft_output_vis[i][:, :, ::-1] * 255.0).astype(int)
                 #     )
-              
-            metrics_dict["SSIM"] = metrics_dict["SSIM"] / args.batch_size
-            avg_metrics += metrics_dict
+
+            if (target == 0).all() == False:
+                metrics_dict["SSIM"] = metrics_dict["SSIM"] / args.batch_size
+                avg_metrics += metrics_dict
 
             pbar.update(args.batch_size)
             pbar.set_description(

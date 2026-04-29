@@ -57,7 +57,7 @@ def base_config():
     output_dir = Path("output/diffusercam") / exp_name
     ckpt_dir = Path("ckpts/diffusercam") / exp_name
     run_dir = Path("runs/diffusercam") / exp_name  # Tensorboard
-    test_set_path = None
+    test_set_path = "test_image"
     load_dir = None
 
     # ---------------------------------------------------------------------------- #
@@ -144,7 +144,7 @@ def base_config():
     # choose cpu or cuda:0 device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     distdataparallel = False
-    val_train = False
+    eval_on = "test"  # "train" or "test" or "val"
     static_val_image = ""
     decode_sim = False
     preprocess_with_unet=False
