@@ -520,31 +520,31 @@ def main(_run):
 
                         if not args.is_svd:
                             writer.add_image(
-                                f"{interm_name}/Val_{e+1}",
+                                f"{interm_name}/Val_{i+1}",
                                 fft_output_vis.cpu().detach(),
                                 global_step,
                             )
 
                         writer.add_image(
-                            f"Source/Val_{e+1}", source_vis.cpu().detach(), global_step
+                            f"Source/Val_{i+1}", source_vis.cpu().detach(), global_step
                         )
                         writer.add_image(
-                            f"Target/Val_{e+1}", target_vis.cpu().detach(), global_step
+                            f"Target/Val_{i+1}", target_vis.cpu().detach(), global_step
                         )
                         writer.add_image(
-                            f"Output/Val_{e+1}", output_vis.cpu().detach(), global_step
+                            f"Output/Val_{i+1}", output_vis.cpu().detach(), global_step
                         )
 
                         writer.add_text(
-                            f"Filename/Val_{e + 1}", filename[e], global_step
+                            f"Filename/Val_{i+1}", filename[e], global_step
                         )
 
                         # save images to log dir
-                        vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch}_{i}.png")
-                        vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch}_{i}.png")
-                        vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch}_{i}.png")
+                        vutils.save_image(source_vis.cpu().detach(), images_dir_val_source / f"val_source_{epoch=}_{i=}.png")
+                        vutils.save_image(target_vis.cpu().detach(), images_dir_val_target / f"val_target_{epoch=}_{i=}.png")
+                        vutils.save_image(output_vis.cpu().detach(), images_dir_val_output / f"val_output_{epoch=}_{i=}.png")
                         if not args.is_svd:
-                            vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch}_{i}.png")
+                            vutils.save_image(fft_output_vis.cpu().detach(), images_dir_val_fft / f"val_{interm_name.lower()}_{epoch=}_{i=}.png")
 
                     if is_local_rank_0:
                         for metric in avg_metrics.loss_dict:
