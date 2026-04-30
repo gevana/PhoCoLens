@@ -1,6 +1,10 @@
 """
 Train Script for Phase Mask and Amplitude Mask
 """
+import os 
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+
+
 # Libraries
 from sacred import Experiment
 from tqdm import tqdm
