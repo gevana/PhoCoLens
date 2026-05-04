@@ -147,7 +147,7 @@ def main(_run):
     logging.info(f"evaluating on {args.eval_on} set of size {len(dl)}")
     # Val and test paths
     val_path.mkdir(exist_ok=True, parents=True)
-
+    logging.info(f"\nOutput dir saved to : {val_path}\n")
 
     pbar = tqdm(range(len(dl) * args.batch_size), dynamic_ncols=True)
 
@@ -235,7 +235,7 @@ def main(_run):
 
                 # Dump to output folder
                 name = filename[e].replace(".JPEG", ".png").replace('.npy','.png').replace(".tiff",".png")
-                parent = name.split("_")[0]
+                parent = name.split(".")[0]
                 path = val_path / parent
                 path.mkdir(exist_ok=True, parents=True)
                 path_output = path / ("output_" + name)

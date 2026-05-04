@@ -108,12 +108,13 @@ class LenslessLearningInTheWild(Dataset):
             diffused = self.read_image(self.xs[idx])
             x = transform(diffused)
         elif self.suffix == '.tiff':            
-            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/4095. - 0.008273973
-            testim = cv2.resize(testim, (480, 270))
-            testim = (testim - 0.5) * 2
-            testim= testim.transpose((2, 0, 1))
-            #testim = np.expand_dims(testim,0)
-            testim = torch.tensor(testim)
+            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/4095.#  - 0.008273973
+            testim = transform(testim)
+            # testim = cv2.resize(testim, (480, 270))
+            # testim = (testim - 0.5) * 2
+            # testim= testim.transpose((2, 0, 1))
+            # #testim = np.expand_dims(testim,0)
+            # testim = torch.tensor(testim)
 
         return testim, torch.tensor(0), str(self.xs[idx].name)
 

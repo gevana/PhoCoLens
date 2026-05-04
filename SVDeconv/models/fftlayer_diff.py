@@ -115,10 +115,9 @@ class FFTLayer_diff(nn.Module):
             psf_crop, Gamma=args.fft_gamma, centre_roll=False
         )
 
-        self.wiener_crop = nn.Parameter(wiener_crop, requires_grad=requires_grad)
-
+        self.wiener_crop = nn.Parameter(wiener_crop, requires_grad=args.weight_update)
         self.normalizer = nn.Parameter(
-            torch.tensor([1 / 0.0008]).reshape(1, 1, 1, 1), requires_grad=requires_grad
+            torch.tensor([1 / 0.0008]).reshape(1, 1, 1, 1), requires_grad=args.weight_update
         )
 
         if self.args.use_mask:
