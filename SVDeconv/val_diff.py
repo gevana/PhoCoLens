@@ -225,6 +225,10 @@ def main(_run):
                 output_numpy = (
                     output[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
                 )
+                output_numpy = (output_numpy - output_numpy.min()) / (
+                    output_numpy.max() - output_numpy.min()
+                )
+
                 if (target[e] == 0).all() == False:
                     target_numpy = (
                         target[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()

@@ -52,6 +52,7 @@ def get_dataloaders(args, is_local_rank_0: bool = True):
             test_dataset = dataset.test_dataset
         else:
             test_dataset = dataset.val_dataset
+            
     if is_local_rank_0:
         logging.info(
             f"Dataset: {args.dataset_name} Len Train: {len(train_dataset)} Val: {len(val_dataset)}  Test: {len(test_dataset)}"

@@ -77,7 +77,12 @@ class LenslessLearning(Dataset):
         # print(diffused, ground_truth)
         # print("hello!", np.load(diffused).shape, np.load(ground_truth).shape)
         
-        x = transform(np.load(diffused))
+        if diffused.name.endswith('.png'):
+            x = np.array(Image.open(diffused))
+            x = transform(x)
+        else:
+            x = transform(np.load(diffused))
+        
         if ground_truth.name.endswith('.png'):
             y = np.array(Image.open(ground_truth))
             y = transform(y)
@@ -125,10 +130,18 @@ class LenslessLearningCollection:
 
         self.psf = load_psf(path / 'psf.tiff')
 
-        train_diffused, train_ground_truth = load_manifest(path, 'dataset_train.csv', decode_sim = args.decode_sim)
+        train_diffused, train_ground_truth = load_manifest(path,
+                 'dataset_train.csv', 
+                 decode_sim = args.decode_sim,
+                 use_simulated_dataset=args.simulated_dir is not None,
+                 simulated_dataset_dir=args.simulated_dir)
+
         if args.sanity_eval:
             train_diffused, train_ground_truth =[],[]
-        val_diffused, val_ground_truth = load_manifest(path, 'dataset_test.csv', decode_sim = args.decode_sim)
+        val_diffused, val_ground_truth = load_manifest(path, 'dataset_test.csv', 
+                        decode_sim = args.decode_sim, 
+                        use_simulated_dataset=args.simulated_dir is not None,
+                        simulated_dataset_dir=args.simulated_dir)
 
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth)
         self.val_dataset = LenslessLearning(val_diffused, val_ground_truth)
@@ -139,13 +152,16 @@ class LenslessLearningCollection:
         self.region_of_interest = region_of_interest
 
 
-def load_manifest(path, csv_filename, decode_sim = False):
+def load_manifest(path, csv_filename, decode_sim = False,use_simulated_dataset=False,simulated_dataset_dir=None):
     with open(path / csv_filename) as f:
         manifest = f.read().split()
 
     xs, ys = [], []
     for filename in manifest:
-        x = path / 'diffuser_images' / filename.replace(".jpg.tiff", ".npy")
+        if use_simulated_dataset:
+            x = Path(simulated_dataset_dir)/filename.replace(".jpg.tiff", ".png")
+        else:
+            x = path / 'diffuser_images' / filename.replace(".jpg.tiff", ".npy")
         if decode_sim:
             y = path / 'decode_sim_padding_png' / filename.replace(".jpg.tiff", ".png")
         else:
@@ -156,4 +172,12 @@ def load_manifest(path, csv_filename, decode_sim = False):
         ys.append(y)
         # else:
         #     print(f"No file named {x}")
+    # check all files exist
+    for idx, (x, y) in enumerate(zip(xs, ys)):
+        if not x.exists() or not y.exists():
+            xs[idx] = None
+            ys[idx] = None
+
+    xs = [x for x in xs if x is not None]
+    ys = [y for y in ys if y is not None]
     return xs, ys
