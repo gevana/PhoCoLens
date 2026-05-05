@@ -104,8 +104,8 @@ def main(_run):
     # Model
     G, FFT = get_model.model(args)
     if is_local_rank_0:
-        logging.info("G: {G}")
-        logging.info("FFT: {FFT}")
+        logging.info(f"G model class name: {G.__class__.__name__}")
+        logging.info(f"FFT model class name: {FFT.__class__.__name__}")
 
     G = G.to(rank)
     FFT = FFT.to(rank)
