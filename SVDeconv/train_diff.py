@@ -103,6 +103,10 @@ def main(_run):
 
     # Model
     G, FFT = get_model.model(args)
+    if is_local_rank_0:
+        logging.info("G: {G}")
+        logging.info("FFT: {FFT}")
+
     G = G.to(rank)
     FFT = FFT.to(rank)
 
