@@ -637,6 +637,8 @@ def main(_run):
                     tag="best",
                 )
 
+
+            torch.cuda.empty_cache()
     except KeyboardInterrupt:
         if is_local_rank_0:
             logging.info("-" * 89)
