@@ -145,6 +145,7 @@ def base_config():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     distdataparallel = False
     eval_on = "test"  # "train" or "test" or "val"
+    save_source = False
     static_val_image = ""
     decode_sim = False
     preprocess_with_unet=False

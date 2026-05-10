@@ -208,7 +208,8 @@ def main(_run):
             for e in range(args.batch_size):
                 # Compute SSIM
                 fft_output_vis = []
-     
+
+                source_numpy = source[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
       
                 in_c = fft_output[e].shape[0]
                 if in_c // 4 == 1:
@@ -225,9 +226,10 @@ def main(_run):
                 output_numpy = (
                     output[e].mul(0.5).add(0.5).permute(1, 2, 0).cpu().detach().numpy()
                 )
-                output_numpy = (output_numpy - output_numpy.min()) / (
-                    output_numpy.max() - output_numpy.min()
-                )
+
+                # output_numpy = (output_numpy - output_numpy.min()) / (
+                #     output_numpy.max() - output_numpy.min()
+                # )
 
                 if (target[e] == 0).all() == False:
                     target_numpy = (
@@ -244,7 +246,13 @@ def main(_run):
                 path.mkdir(exist_ok=True, parents=True)
                 path_output = path / ("output_" + name)
                 path_target = path / ("target_" + name)
+                path_source = path / ("source_" + name)
                 path_fft = path / (f"{interm_name}_" + name)
+
+                if args.save_source:
+                    cv2.imwrite(
+                        str(path_source), (source_numpy[:, :, ::-1] * 255.0).astype(int)
+                    )
 
                 cv2.imwrite(
                     str(path_output), (output_numpy[:, :, ::-1] * 255.0).astype(int)

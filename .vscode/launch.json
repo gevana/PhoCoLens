@@ -97,6 +97,7 @@
                 //"save_filename_latest_FFT=Epoch_90_FFT_latest.pth",
                 "output_dir=temp_out/diffusercam/test_ido4_svd",
                 //"output_dir=/mnt/extra/experiments/lensless/results/diffusercam/regW",
+                "output_dir=/mnt/extra/experiments/lensless/results/diffusercam_verb/fixW",
                 //"is_dummy_wiener=True",
                 //"test_set_path=test_image",
                 "eval_on=test",
