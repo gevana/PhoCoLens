@@ -80,6 +80,9 @@ class LenslessLearning(Dataset):
         if diffused.name.endswith('.png'):
             x = np.array(Image.open(diffused))
             x = transform(x)
+        elif diffused.name.endswith('.tiff'):
+            x = cv2.imread(diffused, -1).astype(np.float32)/4095.
+            x = transform(x)
         else:
             x = transform(np.load(diffused))
         
@@ -159,7 +162,7 @@ def load_manifest(path, csv_filename, decode_sim = False,use_simulated_dataset=F
     xs, ys = [], []
     for filename in manifest:
         if use_simulated_dataset:
-            x = Path(simulated_dataset_dir)/filename.replace(".jpg.tiff", ".png")
+            x = Path(simulated_dataset_dir)/filename.replace(".jpg.tiff", ".tiff")
         else:
             x = path / 'diffuser_images' / filename.replace(".jpg.tiff", ".npy")
         if decode_sim:
