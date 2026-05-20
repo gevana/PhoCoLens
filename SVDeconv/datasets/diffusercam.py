@@ -27,6 +27,7 @@ from pathlib import Path
 if TYPE_CHECKING:
     from utils.typing_alias import *
 
+rng = np.random.default_rng(seed=42)
 
 ex = Experiment("data")
 ex = initialise(ex)
@@ -81,13 +82,16 @@ class LenslessLearning(Dataset):
             x = np.array(Image.open(diffused))
             x = transform(x)
         elif diffused.name.endswith('.tiff'):
-            x = cv2.imread(diffused, -1).astype(np.float32)/4095.
+            x = cv2.imread(diffused, -1).astype(np.float32)/65535.
             x = transform(x)
         else:
             x = transform(np.load(diffused))
         
         if ground_truth.name.endswith('.png'):
             y = np.array(Image.open(ground_truth))
+            y = transform(y)
+        elif diffused.name.endswith('.tiff'):
+            y= cv2.imread(ground_truth, -1).astype(np.float32)/65535.
             y = transform(y)
         else:
             y = transform(np.load(ground_truth))
@@ -99,7 +103,7 @@ class LenslessLearningInTheWild(Dataset):
     def __init__(self, path,suffix='.npy'):
         xs = []
         self.suffix = suffix
-        manifest = sorted((x.name for x in path.glob(f'*{suffix}')))
+        manifest = sorted((x.relative_to(path) for x in path.rglob(f'*{suffix}')))
         for filename in manifest:
             xs.append(path / filename)
 
@@ -133,18 +137,23 @@ class LenslessLearningCollection:
 
         self.psf = load_psf(path / 'psf.tiff')
 
-        train_diffused, train_ground_truth = load_manifest(path,
-                 'dataset_train.csv', 
+        if args.train_csv_filename is not None:
+            train_diffused, train_ground_truth = load_manifest(path,
+                 csv_filename=args.train_csv_filename, 
                  decode_sim = args.decode_sim,
                  use_simulated_dataset=args.simulated_dir is not None,
                  simulated_dataset_dir=args.simulated_dir)
 
-        if args.sanity_eval:
-            train_diffused, train_ground_truth =[],[]
-        val_diffused, val_ground_truth = load_manifest(path, 'dataset_test.csv', 
+            if args.sanity_eval:
+                train_diffused, train_ground_truth =[],[]
+            val_diffused, val_ground_truth = load_manifest(path,
+                         csv_filename=args.val_csv_filename, 
                         decode_sim = args.decode_sim, 
                         use_simulated_dataset=args.simulated_dir is not None,
                         simulated_dataset_dir=args.simulated_dir)
+
+        else: 
+            train_diffused, train_ground_truth, val_diffused, val_ground_truth = get_files_list_all_datasets(path,suffix='.tiff')
 
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth)
         self.val_dataset = LenslessLearning(val_diffused, val_ground_truth)
@@ -155,9 +164,43 @@ class LenslessLearningCollection:
         self.region_of_interest = region_of_interest
 
 
+
+def get_files_list_from_dir(path,suffix = '.tiff'):
+
+    files_list =[p.name for p in (path/'gt_tiff').iterdir() if p.is_file() and p.suffix == suffix]   
+    files_list = rng.permutation(files_list)
+
+    
+    train_files_names = files_list[:int(len(files_list)*0.9)]
+    val_files_names = files_list[int(len(files_list)*0.9):]
+
+    train_diffused_files = [path/'diffused'/x for x in train_files_names]
+    train_gt_files = [path/'gt_tiff'/x for x in train_files_names]
+
+    val_diffused_files = [path/'diffused'/x for x in val_files_names]
+    val_gt_files = [path/'gt_tiff'/x for x in val_files_names]
+
+    return train_diffused_files, train_gt_files, val_diffused_files, val_gt_files
+
+def get_files_list_all_datasets(path,suffix = '.tiff'):
+    train_diffused_files, train_gt_files, val_diffused_files, val_gt_files = [], [], [], []
+    for dataset in path.iterdir():
+        if dataset.is_dir():
+            td, tg, vd, vg = get_files_list_from_dir(dataset,suffix)
+            train_diffused_files.extend(td)
+            train_gt_files.extend(tg)
+            val_diffused_files.extend(vd)
+            val_gt_files.extend(vg)
+    return train_diffused_files, train_gt_files, val_diffused_files, val_gt_files
+
+
 def load_manifest(path, csv_filename, decode_sim = False,use_simulated_dataset=False,simulated_dataset_dir=None):
-    with open(path / csv_filename) as f:
-        manifest = f.read().split()
+    if csv_filename is not None:
+        with open(path / csv_filename) as f:
+            manifest = f.read().split()
+    else:
+        raise ValueError(f"csv_filename is required")
+
 
     xs, ys = [], []
     for filename in manifest:

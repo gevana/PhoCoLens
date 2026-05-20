@@ -63,7 +63,8 @@ def base_config():
     # ---------------------------------------------------------------------------- #
     # Data
     # ---------------------------------------------------------------------------- #
-
+    train_csv_filename = None# "dataset_train.csv"
+    val_csv_filename = None# "dataset_test.csv"
 
     shuffle = True
     train_gaussian_noise = 5e-3
