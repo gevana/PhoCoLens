@@ -106,7 +106,7 @@ def base_config():
 
     log_interval = 100  # the number of iterations (default: 10) to print at
     save_ckpt_interval = log_interval * 10
-    save_copy_every_epochs = 10
+    save_copy_every_epochs = 100
     # ---------------------------------------------------------------------------- #
     # Model
     # ---------------------------------------------------------------------------- #
