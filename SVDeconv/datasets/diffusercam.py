@@ -59,12 +59,13 @@ def load_psf(path):
 
 
 class LenslessLearning(Dataset):
-    def __init__(self, diffuser_images, ground_truth_images):
+    def __init__(self, diffuser_images, ground_truth_images,normalize=4095):
         """
         Everything is upside-down, and the colors are BGR...
         """
         self.xs = diffuser_images
         self.ys = ground_truth_images
+        self.normalize = normalize
 
     def read_image(self, filename):
         image = np.load(filename)
@@ -82,7 +83,7 @@ class LenslessLearning(Dataset):
             x = np.array(Image.open(diffused))
             x = transform(x)
         elif diffused.name.endswith('.tiff'):
-            x = cv2.imread(diffused, -1).astype(np.float32)/65535.
+            x = cv2.imread(diffused, -1).astype(np.float32)/self.normalize
             x = transform(x)
         else:
             x = transform(np.load(diffused))
@@ -91,7 +92,7 @@ class LenslessLearning(Dataset):
             y = np.array(Image.open(ground_truth))
             y = transform(y)
         elif diffused.name.endswith('.tiff'):
-            y= cv2.imread(ground_truth, -1).astype(np.float32)/65535.
+            y= cv2.imread(ground_truth, -1).astype(np.float32)/self.normalize
             y = transform(y)
         else:
             y = transform(np.load(ground_truth))
@@ -100,9 +101,10 @@ class LenslessLearning(Dataset):
 
 
 class LenslessLearningInTheWild(Dataset):
-    def __init__(self, path,suffix='.npy'):
+    def __init__(self, path,suffix='.npy',normalize=4095):
         xs = []
         self.suffix = suffix
+        self.normalize = normalize
         manifest = sorted((x.relative_to(path) for x in path.rglob(f'*{suffix}')))
         for filename in manifest:
             xs.append(path / filename)
@@ -120,7 +122,7 @@ class LenslessLearningInTheWild(Dataset):
             diffused = self.read_image(self.xs[idx])
             x = transform(diffused)
         elif self.suffix == '.tiff':            
-            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/4095.#  - 0.008273973
+            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normaliz #4095.#  - 0.008273973
             testim = transform(testim)
             # testim = cv2.resize(testim, (480, 270))
             # testim = (testim - 0.5) * 2
@@ -155,10 +157,10 @@ class LenslessLearningCollection:
         else: 
             train_diffused, train_ground_truth, val_diffused, val_ground_truth = get_files_list_all_datasets(path,suffix='.tiff')
 
-        self.train_dataset = LenslessLearning(train_diffused, train_ground_truth)
-        self.val_dataset = LenslessLearning(val_diffused, val_ground_truth)
+        self.train_dataset = LenslessLearning(train_diffused, train_ground_truth,args.normalize_val)
+        self.val_dataset = LenslessLearning(val_diffused, val_ground_truth,args.normalize_val)
         if args.test_set_path is not None:
-            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.tiff')
+            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.tiff',normalize=args.normalize_val)
         else:
             self.test_dataset = None
         self.region_of_interest = region_of_interest

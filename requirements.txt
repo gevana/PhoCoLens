@@ -31,6 +31,9 @@ recordclass
 lpips
 scikit-image
 imagecodecs
+rawpy
+exifread
+libtmux
 -e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
 -e git+https://github.com/openai/CLIP.git@main#egg=clip
 # -e .
