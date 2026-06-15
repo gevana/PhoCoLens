@@ -34,7 +34,7 @@ fft_args_dict = {
     "fft_requires_grad": False,
     "fft_epochs": 0,
     "use_mask": False,
-    "normalize_val":4095,
+    "normalize_val":2**15,
 }
 
 def base_config():
