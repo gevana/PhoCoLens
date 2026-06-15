@@ -139,9 +139,9 @@ def main(_run):
         )
 
 
-
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_dir = os.path.join(args.run_dir, timestamp)
+    if args.timestamp is None:
+        args.timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = os.path.join(args.run_dir, args.timestamp)
     images_dir = os.path.join(log_dir, "images")
     ckpt_dir = os.path.join(log_dir, "ckpts")
     args.ckpt_dir = Path(ckpt_dir)
@@ -637,8 +637,12 @@ def main(_run):
                     tag="best",
                 )
 
+            #torch.cuda.empty_cache()
 
-            torch.cuda.empty_cache()
+
+
+
+
     except KeyboardInterrupt:
         if is_local_rank_0:
             logging.info("-" * 89)
@@ -665,3 +669,8 @@ def main(_run):
             writer.close()
             logging.info("Training finished.\n")
             logging.info("Results are saved in {}".format(log_dir))
+
+    # eval mode - load best models and evaluate on test set without training
+    logging.info("Evaluation mode - loading best models and evaluating on test set")
+    
+    

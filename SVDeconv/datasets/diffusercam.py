@@ -106,6 +106,7 @@ class LenslessLearningInTheWild(Dataset):
         self.suffix = suffix
         self.normalize = normalize
         manifest = sorted((x.relative_to(path) for x in path.rglob(f'*{suffix}')))
+        manifest = [f for f in manifest if f.parent.name != 'gt_tiff']
         for filename in manifest:
             xs.append(path / filename)
 
@@ -122,7 +123,7 @@ class LenslessLearningInTheWild(Dataset):
             diffused = self.read_image(self.xs[idx])
             x = transform(diffused)
         elif self.suffix == '.tiff':            
-            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normaliz #4095.#  - 0.008273973
+            testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normalize #4095.#  - 0.008273973
             testim = transform(testim)
             # testim = cv2.resize(testim, (480, 270))
             # testim = (testim - 0.5) * 2

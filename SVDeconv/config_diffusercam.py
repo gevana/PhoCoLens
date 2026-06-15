@@ -53,6 +53,7 @@ def base_config():
     # Directories
     # ---------------------------------------------------------------------------- #
 
+    timestamp = None
     image_dir = Path("data/diffusercam")
     psf_mat = Path(image_dir) / "psf.tiff"
     output_dir = Path("output/diffusercam") / exp_name
