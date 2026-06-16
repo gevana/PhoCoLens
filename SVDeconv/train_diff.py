@@ -412,7 +412,7 @@ def main(_run):
                                     vutils.save_image(fft_output_vis.cpu().detach(), images_dir_train_fft / f"train_{interm_name.lower()}_{global_step}_{e+1}.png")
 
                 # Save checkpoint
-                if is_local_rank_0 and (i % args.save_ckpt_interval == 0):
+                if is_local_rank_0 and False:#(i % args.save_ckpt_interval == 0):
 
                     logging.info(
                         f"Saving weights at epoch {epoch + 1} global step {global_step}"
