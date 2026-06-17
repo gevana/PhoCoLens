@@ -102,8 +102,8 @@ def base_config():
     save_filename_FFT = "FFT.pth"
     save_filename_D = "D.pth"
 
-    save_filename_latest_G = "model_latest.pth"
-    save_filename_latest_FFT = "FFT_latest.pth" 
+    save_filename_latest_G = "model.pth"
+    save_filename_latest_FFT = "FFT.pth" 
     save_filename_latest_D = "D_latest.pth"
 
     log_interval = 100  # the number of iterations (default: 10) to print at

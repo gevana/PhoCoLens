@@ -79,7 +79,12 @@ def main(_run):
     ckpt_dir = Path(args.ckpt_dir)
     model_gen_path = ckpt_dir / args.save_filename_latest_G
     model_fft_path = ckpt_dir / args.save_filename_latest_FFT
+    print('############################### \n')
     print("model_gen_path.exists()", model_gen_path.exists(), "model_fft_path.exists()", model_fft_path.exists())
+    
+    assert(model_gen_path.exists())
+    assert(model_fft_path.exists())
+    
     print("model_gen_path", model_gen_path, "model_fft_path", model_fft_path)
     if  model_gen_path.exists() and model_fft_path.exists():
         gen_ckpt = torch.load(model_gen_path, map_location=torch.device("cpu"))
