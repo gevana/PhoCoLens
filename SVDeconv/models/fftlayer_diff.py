@@ -21,7 +21,8 @@ from PIL import Image
 ex = Experiment("FFT-Layer")
 ex = initialise(ex)
 
-SIZE = 270, 480
+SIZE = 270, 480 
+# todo : take size from args!!!!
 
 def transform(image, gray=False):
     image = np.flip(np.flipud(image), axis=2)
@@ -33,7 +34,12 @@ def transform(image, gray=False):
     return image
 
 def load_psf(path):
-    psf = np.array(Image.open(path))
+    if path.suffix == '.tiff':
+        psf = np.array(Image.open(path))
+    elif path.suffix == '.npy':
+        psf = np.load(path)
+    else:
+        raise ValueError("Unsupported PSF format: {}".format(path.suffix))
     return transform(psf)
 
 def fft_conv2d(input, kernel):
@@ -100,7 +106,7 @@ class FFTLayer_diff(nn.Module):
         self.psf = psf
         if len(psf.shape) == 2:
             psf = psf.unsqueeze(0)
-
+        
 
         psf_crop_top = args.psf_centre_x - args.psf_crop_size_x // 2
         psf_crop_bottom = args.psf_centre_x + args.psf_crop_size_x // 2
