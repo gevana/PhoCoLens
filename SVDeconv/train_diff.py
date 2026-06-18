@@ -637,7 +637,7 @@ def main(_run):
                     tag="best",
                 )
 
-            #torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
 
 
 
