@@ -53,9 +53,10 @@ def base_config():
     # Directories
     # ---------------------------------------------------------------------------- #
 
+    psf_file_name =  "psf.tiff"
     timestamp = None
     image_dir = Path("data/diffusercam")
-    psf_mat = Path(image_dir) / "psf.tiff"
+    psf_mat = Path(image_dir) / psf_file_name
     output_dir = Path("output/diffusercam") / exp_name
     ckpt_dir = Path("ckpts/diffusercam") / exp_name
     run_dir = Path("runs/diffusercam") / exp_name  # Tensorboard

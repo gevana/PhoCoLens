@@ -138,7 +138,7 @@ class LenslessLearningCollection:
     def __init__(self, args):
         path = Path(args.image_dir)
 
-        self.psf = load_psf(path / 'psf.tiff')
+        #self.psf = load_psf(path / 'psf.tiff')
 
         if args.train_csv_filename is not None:
             train_diffused, train_ground_truth = load_manifest(path,

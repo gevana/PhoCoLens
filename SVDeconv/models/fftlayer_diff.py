@@ -37,7 +37,7 @@ def load_psf(path):
     if path.suffix == '.tiff':
         psf = np.array(Image.open(path))
     elif path.suffix == '.npy':
-        psf = np.load(path)
+        psf = np.load(path).astype(np.float32)
     else:
         raise ValueError("Unsupported PSF format: {}".format(path.suffix))
     return transform(psf)
