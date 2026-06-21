@@ -1,4 +1,6 @@
+#python3 -m venv myenv
 #pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
 #torch==2.0.0
 #torchvision==0.15.1
@@ -21,7 +23,7 @@ streamlit-drawable-canvas>=0.8.0
 torchmetrics>=0.6.0
 #xformers==0.0.16
 xformers>=0.0.28
-triton
+#triton
 matplotlib
 wandb
 pillow
