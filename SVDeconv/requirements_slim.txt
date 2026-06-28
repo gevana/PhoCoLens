@@ -1,0 +1,16 @@
+opencv-python>=4.6.0.66
+imageio>=2.9.0
+numpy>=1.23.1
+imageio-ffmpeg>=0.4.2
+pytorch-lightning>=1.4.2
+omegaconf>=2.1.1
+matplotlib
+pillow
+sacred
+recordclass
+lpips
+scikit-image
+rawpy
+exifread
+libtmux
+tensorboard
