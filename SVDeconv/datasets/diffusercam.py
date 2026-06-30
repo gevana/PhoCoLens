@@ -122,7 +122,7 @@ class LenslessLearningInTheWild(Dataset):
         if self.suffix == '.npy':
             diffused = self.read_image(self.xs[idx])
             x = transform(diffused)
-        elif self.suffix == '.tiff':            
+        elif self.suffix in ('.tiff','.bmp'):            
             testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normalize #4095.#  - 0.008273973
             testim = transform(testim)
             # testim = cv2.resize(testim, (480, 270))
@@ -161,7 +161,7 @@ class LenslessLearningCollection:
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth,args.normalize_val)
         self.val_dataset = LenslessLearning(val_diffused, val_ground_truth,args.normalize_val)
         if args.test_set_path is not None:
-            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.tiff',normalize=args.normalize_val)
+            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.bmp',normalize=args.normalize_val)
         else:
             self.test_dataset = None
         self.region_of_interest = region_of_interest
