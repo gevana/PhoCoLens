@@ -36,8 +36,11 @@ def transform(image, gray=False):
 def load_psf(path):
     if path.suffix == '.tiff':
         psf = np.array(Image.open(path))
+    if path.suffix == '.bmp':
+        psf = np.array(Image.open(path))
     elif path.suffix == '.npy':
         psf = np.load(path).astype(np.float32)
+        psf /= psf.max()
     else:
         raise ValueError("Unsupported PSF format: {}".format(path.suffix))
     return transform(psf)

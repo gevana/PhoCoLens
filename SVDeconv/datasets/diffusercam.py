@@ -7,6 +7,8 @@ from torchvision.transforms.functional import (
     to_tensor,
     resize,
 )
+from skimage.transform import resize as resize_ski
+
 
 from dataclasses import dataclass
 import logging
@@ -38,6 +40,26 @@ SIZE = 270, 480
 def region_of_interest(x):
     return x[..., 60:270, 60:440]
 
+def resize_to_sensor( image, sensor_shape):
+    #resize without changing the aspect ratio, crop if needed
+    target_h, target_w = sensor_shape
+    img_h, img_w = image.shape[:2]
+    scale_h = img_h / target_h
+    scale_w = img_w / target_w
+    
+    scale = min(scale_h,scale_w)
+    new_h = int(target_h * scale)
+    new_w = int(target_w * scale)
+
+    crop_h = (img_h - new_h) // 2
+    crop_w = (img_w - new_w) // 2
+
+    image = image[crop_h:crop_h+new_h, crop_w:crop_w+new_w, ...]
+    image = resize_ski(image, 
+                (target_h, target_w),
+                preserve_range=True,
+                anti_aliasing=True).astype(np.float32)
+    return image
 
 def transform(image, gray=False):
     # print(image.shape)
@@ -124,6 +146,7 @@ class LenslessLearningInTheWild(Dataset):
             x = transform(diffused)
         elif self.suffix in ('.tiff','.bmp'):            
             testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normalize #4095.#  - 0.008273973
+            #testim = resize_to_sensor(testim,SIZE)
             testim = transform(testim)
             # testim = cv2.resize(testim, (480, 270))
             # testim = (testim - 0.5) * 2
