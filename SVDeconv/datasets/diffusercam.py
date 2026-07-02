@@ -148,6 +148,7 @@ class LenslessLearningInTheWild(Dataset):
             x = transform(diffused,working_size=self.working_size)
         elif self.suffix in ('.tiff','.bmp'):            
             testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normalize #4095.#  - 0.008273973
+            testim = testim[...,:3]
             #testim = resize_to_sensor(testim,SIZE)
             testim = transform(testim,working_size=self.working_size)
             # testim = cv2.resize(testim, (480, 270))

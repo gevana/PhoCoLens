@@ -38,6 +38,7 @@ def load_psf(path,working_size = None):
         psf = np.array(Image.open(path))
     elif path.suffix == '.bmp':
         psf = np.array(Image.open(path))
+        psf = psf[...,:3]
     elif path.suffix == '.npy':
         psf = np.load(path).astype(np.float32)
         psf /= psf.max()
