@@ -35,7 +35,7 @@ ex = Experiment("data")
 ex = initialise(ex)
 
 
-SIZE = 270, 480
+SIZE = 300,400 #270, 480
 
 def region_of_interest(x):
     return x[..., 60:270, 60:440]
@@ -61,12 +61,12 @@ def resize_to_sensor( image, sensor_shape):
                 anti_aliasing=True).astype(np.float32)
     return image
 
-def transform(image, gray=False):
+def transform(image,working_size, gray=False,):
     # print(image.shape)
     image = np.flip(np.flipud(image), axis=2)
     image = image.copy()
     image = to_tensor(image)
-    image = resize(image, SIZE)
+    image = resize(image, working_size)
     image = (image - 0.5) * 2
     return image
 
@@ -75,19 +75,20 @@ def sort_key(x):
     return int(x[2:-4])
 
 
-def load_psf(path):
+def load_psf(path,working_size):
     psf = np.array(Image.open(path))
-    return transform(psf)
+    return transform(psf,working_size)
 
 
 class LenslessLearning(Dataset):
-    def __init__(self, diffuser_images, ground_truth_images,normalize=4095):
+    def __init__(self, diffuser_images, ground_truth_images,working_size,normalize=4095):
         """
         Everything is upside-down, and the colors are BGR...
         """
         self.xs = diffuser_images
         self.ys = ground_truth_images
         self.normalize = normalize
+        self.working_size = working_size
 
     def read_image(self, filename):
         image = np.load(filename)
@@ -103,30 +104,31 @@ class LenslessLearning(Dataset):
         
         if diffused.name.endswith('.png'):
             x = np.array(Image.open(diffused))
-            x = transform(x)
+            x = transform(x,working_size=self.working_size)
         elif diffused.name.endswith('.tiff'):
             x = cv2.imread(diffused, -1).astype(np.float32)/self.normalize
-            x = transform(x)
+            x = transform(x,working_size=self.working_size)
         else:
-            x = transform(np.load(diffused))
+            x = transform(np.load(diffused),working_size=self.working_size)
         
         if ground_truth.name.endswith('.png'):
             y = np.array(Image.open(ground_truth))
-            y = transform(y)
+            y = transform(y,working_size=self.working_size)
         elif diffused.name.endswith('.tiff'):
             y= cv2.imread(ground_truth, -1).astype(np.float32)/self.normalize
-            y = transform(y)
+            y = transform(y,working_size=self.working_size)
         else:
-            y = transform(np.load(ground_truth))
+            y = transform(np.load(ground_truth),working_size=self.working_size)
         
         return x, y, str(diffused.name)
 
 
 class LenslessLearningInTheWild(Dataset):
-    def __init__(self, path,suffix='.npy',normalize=4095):
+    def __init__(self, path,working_size,suffix='.npy',normalize=4095):
         xs = []
         self.suffix = suffix
         self.normalize = normalize
+        self.working_size = working_size
         manifest = sorted((x.relative_to(path) for x in path.rglob(f'*{suffix}')))
         manifest = [f for f in manifest if f.parent.name != 'gt_tiff']
         for filename in manifest:
@@ -143,11 +145,11 @@ class LenslessLearningInTheWild(Dataset):
     def __getitem__(self, idx):
         if self.suffix == '.npy':
             diffused = self.read_image(self.xs[idx])
-            x = transform(diffused)
+            x = transform(diffused,working_size=self.working_size)
         elif self.suffix in ('.tiff','.bmp'):            
             testim = cv2.imread(self.xs[idx], -1).astype(np.float32)/self.normalize #4095.#  - 0.008273973
             #testim = resize_to_sensor(testim,SIZE)
-            testim = transform(testim)
+            testim = transform(testim,working_size=self.working_size)
             # testim = cv2.resize(testim, (480, 270))
             # testim = (testim - 0.5) * 2
             # testim= testim.transpose((2, 0, 1))
@@ -181,10 +183,16 @@ class LenslessLearningCollection:
         else: 
             train_diffused, train_ground_truth, val_diffused, val_ground_truth = get_files_list_all_datasets(path,suffix='.tiff')
 
-        self.train_dataset = LenslessLearning(train_diffused, train_ground_truth,args.normalize_val)
-        self.val_dataset = LenslessLearning(val_diffused, val_ground_truth,args.normalize_val)
+        self.train_dataset = LenslessLearning(train_diffused, train_ground_truth,
+                                        working_size=(args.height,args.width),
+                                        normalize=args.normalize_val)
+        self.val_dataset = LenslessLearning(val_diffused, val_ground_truth,
+                                        working_size=(args.height,args.width),
+                                        normalize=args.normalize_val)
         if args.test_set_path is not None:
-            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,suffix='.bmp',normalize=args.normalize_val)
+            self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,
+                                    working_size=(args.height,args.width),
+                                    suffix='.bmp',normalize=args.normalize_val)
         else:
             self.test_dataset = None
         self.region_of_interest = region_of_interest

@@ -11,31 +11,30 @@ from types import SimpleNamespace
 
 # Define FFT arguments once at the module level
 
-height = 270
-width = 480
-fft_args_dict = {
-    "psf_mat": Path("data/diffusercam/psf.tiff"),
-    "psf_height": height,
-    "psf_width": width,
-    "psf_centre_x": height // 2,
-    "psf_centre_y": width // 2,
-    "psf_crop_size_x": height,
-    "psf_crop_size_y": width,
-    "meas_height": height,
-    "meas_width": width,
-    "meas_centre_x": height // 2,
-    "meas_centre_y": width // 2,
-    "meas_crop_size_x": height,
-    "meas_crop_size_y": width,
-    "pad_meas_mode": "replicate",
-    "image_height": 270,
-    "image_width": 480,
-    "fft_gamma": 100,  # Gamma for Weiner init
-    "fft_requires_grad": False,
-    "fft_epochs": 0,
-    "use_mask": False,
-    "normalize_val":2**15,
-}
+def get_fft_args(height,width):
+    return {
+        "psf_mat": Path("data/diffusercam/psf.tiff"),
+        "psf_height": height,
+        "psf_width": width,
+        "psf_centre_x": height // 2,
+        "psf_centre_y": width // 2,
+        "psf_crop_size_x": height,
+        "psf_crop_size_y": width,
+        "meas_height": height,
+        "meas_width": width,
+        "meas_centre_x": height // 2,
+        "meas_centre_y": width // 2,
+        "meas_crop_size_x": height,
+        "meas_crop_size_y": width,
+        "pad_meas_mode": "replicate",
+        "image_height": height,
+        "image_width": width,
+        "fft_gamma": 100,  # Gamma for Weiner init
+        "fft_requires_grad": False,
+        "fft_epochs": 0,
+        "use_mask": False,
+        "normalize_val":2**15,
+    }
 
 def base_config():
     exp_name = "fft-diffusercam"
@@ -48,7 +47,9 @@ def base_config():
     weight_update = True
     dataset = "diffusercam"
     # Use FFT arguments from the global definition
-    locals().update(fft_args_dict)
+    height = 270
+    width = 480
+    locals().update(get_fft_args(height,width))
     # ---------------------------------------------------------------------------- #
     # Directories
     # ---------------------------------------------------------------------------- #
@@ -188,7 +189,7 @@ def initialise(ex):
         ex.named_config(named_config)
     return ex
 
-fft_args = SimpleNamespace(**fft_args_dict)
+#fft_args = SimpleNamespace(**fft_args_dict)
 
 if __name__ == "__main__":
     str_named_config_ll = [str(named_config) for named_config in named_config_ll]

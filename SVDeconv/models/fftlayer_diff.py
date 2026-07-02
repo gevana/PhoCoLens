@@ -21,29 +21,29 @@ from PIL import Image
 ex = Experiment("FFT-Layer")
 ex = initialise(ex)
 
-SIZE = 270, 480 
+SIZE = 300,400 #270, 480 
 # todo : take size from args!!!!
 
-def transform(image, gray=False):
+def transform(image, working_size, gray=False):
     image = np.flip(np.flipud(image), axis=2)
     image = image.copy()
     image = to_tensor(image)
-    image = resize(image, SIZE)
+    image = resize(image, working_size)
     # average the RGB channels
     # image = image.mean(0, keepdim=True)
     return image
 
-def load_psf(path):
+def load_psf(path,working_size = None):
     if path.suffix == '.tiff':
         psf = np.array(Image.open(path))
-    if path.suffix == '.bmp':
+    elif path.suffix == '.bmp':
         psf = np.array(Image.open(path))
     elif path.suffix == '.npy':
         psf = np.load(path).astype(np.float32)
         psf /= psf.max()
     else:
         raise ValueError("Unsupported PSF format: {}".format(path.suffix))
-    return transform(psf)
+    return transform(psf,working_size=working_size)
 
 def fft_conv2d(input, kernel):
     """
@@ -105,12 +105,11 @@ class FFTLayer_diff(nn.Module):
         super().__init__()
         self.args = args
         requires_grad = True
-        psf = load_psf(args.psf_mat)
+        psf = load_psf(args.psf_mat,working_size = (args.psf_height,args.psf_width))
         self.psf = psf
         if len(psf.shape) == 2:
             psf = psf.unsqueeze(0)
         
-
         psf_crop_top = args.psf_centre_x - args.psf_crop_size_x // 2
         psf_crop_bottom = args.psf_centre_x + args.psf_crop_size_x // 2
         psf_crop_left = args.psf_centre_y - args.psf_crop_size_y // 2
