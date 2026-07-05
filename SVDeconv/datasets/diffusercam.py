@@ -159,6 +159,18 @@ class LenslessLearningInTheWild(Dataset):
 
         return testim, torch.tensor(0), str(self.xs[idx].name)
 
+class LenslessSingleImage(LenslessLearningInTheWild):
+    def __init__(self,image_path,working_size,normalize=4095):
+        image_path = Path(image_path)
+        self.image_path =image_path
+        self.working_size = working_size
+        self.suffix = image_path.suffix
+        self.normalize = normalize
+    
+    def __getitem__(self, idx):
+        return super().__getitem__(0)
+
+
 
 class LenslessLearningCollection:
     def __init__(self, args):
@@ -200,20 +212,22 @@ class LenslessLearningCollection:
 
 
 
-def get_files_list_from_dir(path,suffix = '.tiff'):
+def get_files_list_from_dir(path,suffix = '.tiff',randomize = True,
+                    diffused='diffused',gt_tiff='gt_tiff'):
 
-    files_list =[p.name for p in (path/'gt_tiff').iterdir() if p.is_file() and p.suffix == suffix]   
-    files_list = rng.permutation(files_list)
+    files_list =[p.name for p in (path/gt_tiff).iterdir() if p.is_file() and p.suffix == suffix]   
+    if randomize:
+        files_list = rng.permutation(files_list)
 
     
     train_files_names = files_list[:int(len(files_list)*0.9)]
     val_files_names = files_list[int(len(files_list)*0.9):]
 
-    train_diffused_files = [path/'diffused'/x for x in train_files_names]
-    train_gt_files = [path/'gt_tiff'/x for x in train_files_names]
+    train_diffused_files = [path/diffused/x for x in train_files_names]
+    train_gt_files = [path/gt_tiff/x for x in train_files_names]
 
-    val_diffused_files = [path/'diffused'/x for x in val_files_names]
-    val_gt_files = [path/'gt_tiff'/x for x in val_files_names]
+    val_diffused_files = [path/diffused/x for x in val_files_names]
+    val_gt_files = [path/gt_tiff/x for x in val_files_names]
 
     return train_diffused_files, train_gt_files, val_diffused_files, val_gt_files
 

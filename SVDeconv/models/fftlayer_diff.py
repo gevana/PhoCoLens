@@ -9,14 +9,17 @@ from torchvision.transforms.functional import (
     resize,
 )
 
+from datasets.diffusercam import LenslessSingleImage
 from config import initialise
 from utils.ops import roll_n
 from utils.tupperware import tupperware
 import cv2
 if TYPE_CHECKING:
     from utils.typing_alias import *
+from argparse import Namespace
 
 from PIL import Image
+from pathlib import Path
 
 ex = Experiment("FFT-Layer")
 ex = initialise(ex)
@@ -44,6 +47,9 @@ def load_psf(path,working_size = None):
         psf /= psf.max()
     else:
         raise ValueError("Unsupported PSF format: {}".format(path.suffix))
+    if working_size is None:
+        working_size = (psf.shape[0],psf.shape[1])
+        print("working_size was not set, using PSF shape: ", working_size)
     return transform(psf,working_size=working_size)
 
 def fft_conv2d(input, kernel):
@@ -184,6 +190,42 @@ class FFTLayer_diff(nn.Module):
             fft_w // 2 - img_w // 2 : fft_w // 2 + img_w // 2,
         ]
         return img_deconv
+
+    @classmethod
+    def init_from_psf(cls, psf_path, gamma=100,normalize_val=4095,working_size=None):
+        psf_path = Path(psf_path)
+        psf = load_psf(psf_path,working_size = working_size)
+        args = Namespace(
+            psf_mat = psf_path,
+            psf_height = psf.shape[1],
+            psf_width = psf.shape[2],
+            psf_centre_x = psf.shape[1] // 2,
+            psf_centre_y = psf.shape[2] // 2,
+            psf_crop_size_x = psf.shape[1],
+            psf_crop_size_y = psf.shape[2],
+            weight_update = False,
+            image_height = psf.shape[1],
+            image_width = psf.shape[2],
+            fft_gamma = gamma,
+            normalize_val = normalize_val,
+            use_mask = False,
+        )
+        return cls(args)
+        
+    def forward_image_from_path(self, image_path,normlize = None):
+        dataset = LenslessSingleImage(image_path, 
+                    working_size=(self.args.image_height, self.args.image_width),
+                    normalize=self.normalize_val if normlize is None else normlize)
+        return self.forward(dataset[0])
+    
+    @staticmethod
+    def fft_to_vis(fft_output, ):
+        fft_output_vis = fft_output.detach()[0].mul(0.5).add(0.5)
+        fft_output_vis = (fft_output_vis - fft_output_vis.min()) / (
+                                fft_output_vis.max() - fft_output_vis.min()
+                            )
+        return fft_output_vis
+
 
 
 
