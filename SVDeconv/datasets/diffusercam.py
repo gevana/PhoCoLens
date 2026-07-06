@@ -166,6 +166,7 @@ class LenslessSingleImage(LenslessLearningInTheWild):
         self.working_size = working_size
         self.suffix = image_path.suffix
         self.normalize = normalize
+        self.xs = [image_path]
     
     def __getitem__(self, idx):
         return super().__getitem__(0)

@@ -1,7 +1,9 @@
 #FROM nvcr.io/nvidia/pytorch:25.09-py3
 #docker pull pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
 #FROM nvcr-docker-remote.bart.sec.samsung.net/nvidia/pytorch:24.03-py3
-FROM docker-remote.bart.sec.samsung.net/pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+#FROM docker-remote.bart.sec.samsung.net/pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime
+FROM docker-remote.bart.sec.samsung.net/pytorch/pytorch:2.9.1-cuda13.0-cudnn9-runtime
+
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -20,7 +22,7 @@ WORKDIR /workspace
 
 RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools wheel
-#RUN pip install --no-cache-dir opencv-python-headless
+RUN pip install --no-cache-dir opencv-python-headless
 #RUN pip install opencv-python mlflow tensorboard omegaconf imagecodecs rawpy tqdm tifffile Flask-SocketIO ExifRead scikit-image lpips pytorch_lighting libtmux
 # Optionally copy your code
 # COPY . /workspace

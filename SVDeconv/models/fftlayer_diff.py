@@ -216,7 +216,7 @@ class FFTLayer_diff(nn.Module):
         dataset = LenslessSingleImage(image_path, 
                     working_size=(self.args.image_height, self.args.image_width),
                     normalize=self.normalize_val if normlize is None else normlize)
-        return self.forward(dataset[0])
+        return self.forward(dataset[0][0].unsqueeze(0))
     
     @staticmethod
     def fft_to_vis(fft_output, ):
