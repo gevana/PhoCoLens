@@ -7,6 +7,7 @@ from torchvision.transforms.functional import (
     to_tensor,
     resize,
 )
+import torchvision.transforms.functional as TF
 from skimage.transform import resize as resize_ski
 
 
@@ -81,7 +82,11 @@ def load_psf(path,working_size):
 
 
 class LenslessLearning(Dataset):
-    def __init__(self, diffuser_images, ground_truth_images,working_size,normalize=4095):
+    def __init__(self, diffuser_images, 
+                    ground_truth_images,
+                    working_size,
+                    normalize=4095,
+                    cache_data=False):
         """
         Everything is upside-down, and the colors are BGR...
         """
@@ -89,6 +94,28 @@ class LenslessLearning(Dataset):
         self.ys = ground_truth_images
         self.normalize = normalize
         self.working_size = working_size
+        self.cache_data = cache_data
+        if self.cache_data:
+            self.preload_all_data_to_cache()
+    
+    def preload_all_data_to_cache(self):
+        num_images = len(self.xs)
+        print("Pre-allocating shared memory for inputs and targets...")
+        self.inputs_tensor = torch.zeros((num_images, 3, self.working_size[0], self.working_size[1]), dtype=torch.float32)
+        
+        # Adjust target channels/dtype based on your task (e.g., 1 channel for grayscale/segmentation)
+        self.targets_tensor = torch.zeros((num_images, 3, self.working_size[0], self.working_size[1]), dtype=torch.float32)
+
+
+        for idx in tqdm(range(num_images),desc="preloading all images"):
+            x,y = self.load_sample(idx)
+            self.inputs_tensor[idx] = x
+            self.targets_tensor[idx] = y
+
+        # Move both to shared memory
+        self.inputs_tensor.share_memory_()
+        self.targets_tensor.share_memory_()
+        print("Both tensors locked into Shared Memory!")
 
     def read_image(self, filename):
         image = np.load(filename)
@@ -96,12 +123,10 @@ class LenslessLearning(Dataset):
     def __len__(self):
         return len(self.xs)
 
-    def __getitem__(self, idx):
+
+    def load_sample(self,idx):
         diffused = self.xs[idx]
         ground_truth = self.ys[idx]
-        # print(diffused, ground_truth)
-        # print("hello!", np.load(diffused).shape, np.load(ground_truth).shape)
-        
         if diffused.name.endswith('.png'):
             x = np.array(Image.open(diffused))
             x = transform(x,working_size=self.working_size)
@@ -119,6 +144,18 @@ class LenslessLearning(Dataset):
             y = transform(y,working_size=self.working_size)
         else:
             y = transform(np.load(ground_truth),working_size=self.working_size)
+        
+        return x,y
+
+    def __getitem__(self, idx):
+        diffused = self.xs[idx]
+        if self.cache_data :
+            x = self.inputs_tensor[idx]
+            y = self.targets_tensor[idx]
+        else:
+            x,y=self.load_sample(idx)
+        return x,y,diffused.name
+
         
         return x, y, str(diffused.name)
 
@@ -197,12 +234,21 @@ class LenslessLearningCollection:
         else: 
             train_diffused, train_ground_truth, val_diffused, val_ground_truth = get_files_list_all_datasets(path,suffix='.tiff')
 
+        if args.debug : 
+            train_diffused = train_diffused[:100]
+            train_ground_truth =train_ground_truth[:100]
+            val_diffused = val_diffused[:50]
+            val_ground_truth = val_ground_truth[:50]
+
+
         self.train_dataset = LenslessLearning(train_diffused, train_ground_truth,
                                         working_size=(args.height,args.width),
-                                        normalize=args.normalize_val)
+                                        normalize=args.normalize_val,
+                                        cache_data=args.cache_data)
         self.val_dataset = LenslessLearning(val_diffused, val_ground_truth,
                                         working_size=(args.height,args.width),
-                                        normalize=args.normalize_val)
+                                        normalize=args.normalize_val,
+                                        cache_data=args.cache_data)
         if args.test_set_path is not None:
             self.test_dataset = LenslessLearningInTheWild(path / args.test_set_path,
                                     working_size=(args.height,args.width),
