@@ -49,6 +49,7 @@ def base_config():
     # Use FFT arguments from the global definition
     height = 270
     width = 480
+    debug = False
     locals().update(get_fft_args(height,width))
     # ---------------------------------------------------------------------------- #
     # Directories
@@ -77,12 +78,13 @@ def base_config():
     model = "UNet270480"
     batch_size = 18
     num_threads = batch_size >> 1  # parallel workers
-
+    cache_data = False
     # ---------------------------------------------------------------------------- #
     # Train Configs
     # ---------------------------------------------------------------------------- #
     # Schedules
     num_epochs = 100
+    num_epochs = num_epochs if not debug else 3
     fft_epochs = num_epochs if is_naive else 0
 
     learning_rate = 1e-4
